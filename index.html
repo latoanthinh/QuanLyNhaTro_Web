@@ -791,13 +791,13 @@
                 Swal.fire({
                     title: 'Đăng nhập Quản trị',
                     input: 'password',
-                    inputPlaceholder: 'Mật khẩu (123)',
+                    inputPlaceholder: 'Nhập mật khẩu',
                     showCancelButton: true,
                     confirmButtonText: 'Đăng nhập',
                     cancelButtonText: 'Hủy',
                     confirmButtonColor: '#db2777'
                 }).then((res) => {
-                    if (res.isConfirmed && res.value === "123") {
+                    if (res.isConfirmed && res.value === "2541") {
                         sessionStorage.setItem("isAdminLoggedIn", "true");
                         showAdminView();
                     } else if (res.isConfirmed) {
