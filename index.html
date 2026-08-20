@@ -796,6 +796,19 @@
         function showLoading() { document.getElementById('global-loading').classList.remove('hidden'); }
         function hideLoading() { document.getElementById('global-loading').classList.add('hidden'); }
 
+        function getErrorMessage(error) {
+            if (error && typeof error.message === 'string' && error.message.trim()) {
+                return error.message.trim();
+            }
+            return 'Lỗi không xác định từ hệ thống dữ liệu.';
+        }
+
+        function notifyError(error, title = 'Thao tác thất bại') {
+            const message = getErrorMessage(error);
+            console.error(title, error);
+            Toast.fire({ icon: 'error', title: `${title}: ${message}` });
+        }
+
         async function executeWithLock(btnElement, asyncFn) {
             if (btnElement && btnElement.dataset.processing === "true") return;
 
@@ -806,6 +819,9 @@
 
             try {
                 await asyncFn();
+            } catch (error) {
+                hideLoading();
+                notifyError(error);
             } finally {
                 if (btnElement) {
                     delete btnElement.dataset.processing;
@@ -1189,6 +1205,7 @@
                     const normalizeTasks = [];
                     roomsData.forEach(room => {
                         const original = JSON.stringify({
+                            name: room.name,
                             status: room.status,
                             tenant: room.tenant,
                             occupants: room.occupants,
@@ -1196,6 +1213,8 @@
                             paymentStatus: room.paymentStatus
                         });
 
+                        room.name = String(room.name || '').trim();
+                        room.status = room.status === 'Đang thuê' ? 'Đang thuê' : 'Trống';
                         if (room.status === 'Trống') {
                             room.tenant = '';
                             room.occupants = 0;
@@ -1207,6 +1226,7 @@
                         }
 
                         const normalized = JSON.stringify({
+                            name: room.name,
                             status: room.status,
                             tenant: room.tenant,
                             occupants: room.occupants,
@@ -1263,7 +1283,10 @@
                 updateChatBadge();
 
                 renderOverviewAnalytics();
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                hideLoading();
+                notifyError(err, 'Không thể tải dữ liệu');
+            }
         }
 
         function listenToRoomChat(roomDocId, callback) {
@@ -1698,6 +1721,7 @@
             }
 
             const details = getRoomTotalDetails(room);
+            const existingInvoice = invoicesData.find(inv => inv.requestId === request.id);
 
             document.getElementById('print-date').innerText = 'Ngày lập: ' + new Date().toLocaleDateString('vi-VN');
             document.getElementById('p-room').innerText = room.name;
@@ -1713,10 +1737,16 @@
             document.getElementById('p-status').innerText = room.paymentStatus || 'Chưa thanh toán';
 
             await executeWithLock(btn, async () => {
+                if (existingInvoice) {
+                    window.print();
+                    return;
+                }
+
                 showLoading();
                 const invoiceId = 'inv_' + Date.now();
                 const invoiceData = {
                     id: invoiceId,
+                    requestId: request.id,
                     roomName: room.name,
                     tenantName: room.tenant || 'Chưa cập nhật',
                     total: details.total,
@@ -2204,11 +2234,33 @@
             const name = document.getElementById('room-name').value.trim();
             const status = document.getElementById('room-status').value;
             const tenant = document.getElementById('room-tenant').value.trim();
-            const occupants = Number(document.getElementById('room-occupants').value || 0);
+            const occupants = parseNum(document.getElementById('room-occupants').value);
+            const price = parseNum(document.getElementById('room-price').value);
+            const elecPrice = parseNum(document.getElementById('elec-price').value);
+            const elecOld = parseNum(document.getElementById('elec-old').value);
+            const elecNew = parseNum(document.getElementById('elec-new').value);
+            const waterOld = parseNum(document.getElementById('water-old').value);
+            const waterNew = parseNum(document.getElementById('water-new').value);
+            const waterPriceQuota = parseNum(document.getElementById('water-price-quota').value);
+            const waterPriceNormal = parseNum(document.getElementById('water-price-normal').value);
+            const service = parseNum(document.getElementById('room-service').value);
 
+            if (!name) return Swal.fire({ title: 'Thiếu thông tin', text: 'Vui lòng nhập tên phòng.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             if (status === 'Đang thuê') {
                 if (!tenant) return Swal.fire({ title: 'Thiếu thông tin', text: 'Vui lòng nhập tên khách thuê khi phòng ở trạng thái "Đang thuê".', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
                 if (occupants <= 0) return Swal.fire({ title: 'Thiếu thông tin', text: 'Số người phải lớn hơn 0 khi phòng đang thuê.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            if (roomsData.some(room => room.docId !== currentEditingDocId && room.name.toLowerCase() === name.toLowerCase())) {
+                return Swal.fire({ title: 'Trùng tên phòng', text: 'Tên phòng đã tồn tại. Vui lòng chọn tên khác.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            if ([price, elecPrice, elecOld, elecNew, waterOld, waterNew, waterPriceQuota, waterPriceNormal, service].some(value => value < 0)) {
+                return Swal.fire({ title: 'Dữ liệu không hợp lệ', text: 'Các chỉ số và đơn giá không được là số âm.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            if (elecNew < elecOld) {
+                return Swal.fire({ title: 'Chỉ số điện không hợp lệ', text: 'Số mới phải lớn hơn hoặc bằng số cũ.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            if (waterNew < waterOld) {
+                return Swal.fire({ title: 'Chỉ số nước không hợp lệ', text: 'Số mới phải lớn hơn hoặc bằng số cũ.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             }
 
             const roomData = {
@@ -2218,16 +2270,16 @@
                 occupants: status === 'Đang thuê' ? occupants : 0,
                 phone: status === 'Đang thuê' ? document.getElementById('room-phone').value.trim() : '',
                 paymentStatus: document.getElementById('room-is-paid').value,
-                price: parseNum(document.getElementById('room-price').value),
-                elecPrice: parseNum(document.getElementById('elec-price').value),
-                elecOld: parseNum(document.getElementById('elec-old').value),
-                elecNew: parseNum(document.getElementById('elec-new').value),
-                waterOld: parseNum(document.getElementById('water-old').value),
-                waterNew: parseNum(document.getElementById('water-new').value),
+                price,
+                elecPrice,
+                elecOld,
+                elecNew,
+                waterOld,
+                waterNew,
                 hasWaterQuota: document.getElementById('water-has-quota').checked,
-                waterPriceQuota: parseNum(document.getElementById('water-price-quota').value),
-                waterPriceNormal: parseNum(document.getElementById('water-price-normal').value),
-                service: parseNum(document.getElementById('room-service').value),
+                waterPriceQuota,
+                waterPriceNormal,
+                service,
                 note: document.getElementById('room-note').value.trim()
             };
 
