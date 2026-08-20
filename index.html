@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Nhà Trọ Thông Minh</title>
+    <title>Hệ Thống Quản Lý Nhà Trọ</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -16,6 +16,14 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        html {
+            font-size: clamp(14px, calc(0.25vw + 13px), 16px);
+        }
+
+        body {
+            font-size: 1rem;
+        }
+
         @page {
             size: 80mm auto;
             margin: 0;
@@ -112,6 +120,133 @@
             border: none !important;
             box-shadow: none !important;
         }
+
+        .loading-orb {
+            width: 58px;
+            height: 58px;
+            border-radius: 9999px;
+            background: conic-gradient(from 0deg, #4f46e5, #06b6d4, #818cf8, #4f46e5);
+            animation: loading-spin 1.4s linear infinite;
+            position: relative;
+            box-shadow: 0 0 30px rgba(79, 70, 229, 0.28);
+        }
+
+        .loading-orb::after {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            border-radius: inherit;
+            background: #fff;
+        }
+
+        .loading-orb::before {
+            content: '';
+            position: absolute;
+            inset: 20px;
+            border-radius: inherit;
+            background: #4f46e5;
+            z-index: 1;
+            animation: loading-pulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes loading-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes loading-pulse {
+            0%, 100% { transform: scale(0.75); opacity: 0.65; }
+            50% { transform: scale(1); opacity: 1; }
+        }
+
+        .admin-nav-panel {
+            width: 220px;
+            min-width: 220px;
+            max-height: none;
+            min-height: 420px;
+            opacity: 1;
+            transform: translateY(0);
+            overflow: hidden;
+            transition: width 0.3s ease, min-width 0.3s ease, opacity 0.2s ease, transform 0.3s ease;
+        }
+
+        .admin-nav-panel.is-collapsed {
+            width: 0;
+            min-width: 0;
+            max-height: none;
+            opacity: 0;
+            transform: translateX(-18px);
+            pointer-events: none;
+        }
+
+        .admin-nav-toggle {
+            transition: transform 0.3s ease, background-color 0.2s ease;
+        }
+
+        .admin-nav-toggle.is-collapsed {
+            transform: none;
+        }
+
+        .admin-layout {
+            min-width: 0;
+            overflow: visible;
+        }
+
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
+            gap: 0.75rem;
+            min-width: 0;
+        }
+
+        .admin-stat-card {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .admin-stat-card > div {
+            min-width: 0;
+        }
+
+        .admin-stat-card h3,
+        .admin-stat-card p {
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 640px) {
+            .admin-layout {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .admin-nav-panel {
+                width: 100%;
+                min-width: 0;
+                min-height: auto;
+                max-height: 30rem;
+                transition: max-height 0.3s ease, opacity 0.2s ease, transform 0.3s ease;
+            }
+
+            .admin-nav-panel.is-collapsed {
+                width: 0;
+                min-height: 0;
+                max-height: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+
+            .admin-nav-toggle {
+                position: relative;
+                top: auto;
+                left: auto;
+                transform: none;
+                align-self: flex-start;
+                margin: 0 0 -0.25rem 0.25rem;
+            }
+
+            .admin-nav-toggle.is-collapsed {
+                transform: none;
+            }
+        }
     </style>
 </head>
 
@@ -120,10 +255,13 @@
     <!-- Loading Overlay -->
     <div id="global-loading"
         class="fixed inset-0 bg-slate-900/40 z-[9999] hidden flex flex-col items-center justify-center backdrop-blur-xs">
-        <div
-            class="bg-white p-6 rounded-xl shadow-xl flex flex-col items-center max-w-xs w-full mx-4 border border-slate-100">
-            <div class="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p id="loading-text" class="text-xs font-semibold text-slate-600 mt-3 text-center">Đang xử lý dữ liệu...</p>
+        <div class="bg-white/95 p-7 rounded-2xl shadow-2xl flex flex-col items-center max-w-xs w-full mx-4 border border-white/80">
+            <div class="loading-orb" aria-hidden="true"></div>
+            <p class="text-sm font-bold text-slate-800 mt-4">Đang xử lý</p>
+            <p id="loading-text" class="text-xs font-medium text-slate-500 mt-1 text-center">Vui lòng chờ trong giây lát...</p>
+            <div class="w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-4">
+                <div class="h-full w-1/2 bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full animate-pulse"></div>
+            </div>
         </div>
     </div>
 
@@ -132,7 +270,7 @@
         <div
             class="container mx-auto px-4 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3 max-w-6xl">
             <h1 class="text-base sm:text-lg font-bold text-center sm:text-left truncate w-full sm:w-auto tracking-wide">
-                <i class="fa-solid fa-building-user mr-2 text-indigo-400"></i> Quản Lý Nhà Trọ Thông Minh
+                <i class="fa-solid fa-building-user mr-2 text-indigo-400"></i> Quản Lý Nhà Trọ
             </h1>
             <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
                 <button onclick="switchView('tenant')" id="btn-view-tenant"
@@ -147,7 +285,7 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-3.5 py-6 max-w-5xl">
+    <main class="container mx-auto px-3.5 py-6 max-w-7xl">
 
         <!-- CỔNG KHÁCH THUÊ -->
         <div id="view-tenant" class="space-y-5 max-w-lg mx-auto">
@@ -180,6 +318,7 @@
                             <p class="text-xs text-slate-500 mt-0.5">Khách thuê: <span id="t-tenant-name"
                                     class="font-semibold text-slate-700">--</span> (<span id="t-occupants">1</span>
                                 người)</p>
+                            <p id="t-contract-info" class="text-[11px] text-slate-500 mt-1 hidden"></p>
                         </div>
                         <span id="t-payment-status-badge"
                             class="px-2.5 py-1 text-xs rounded-md font-semibold bg-rose-50 text-rose-600 border border-rose-100">Chưa
@@ -209,6 +348,9 @@
                         </div>
                         <div class="flex justify-between"><span class="text-slate-600">Dịch vụ khác:</span>
                             <span id="t-service" class="font-semibold">0 đ</span>
+                        </div>
+                        <div id="tenant-debt-row" class="flex justify-between text-rose-600 hidden">
+                            <span>Tiền nợ kỳ trước:</span><span id="t-debt" class="font-semibold">0 đ</span>
                         </div>
                         <hr class="my-2 border-slate-200">
                         <div class="flex justify-between text-base font-bold text-indigo-600">
@@ -240,45 +382,54 @@
 
         <!-- GIAO DIỆN QUẢN LÝ CHỦ TRỌ -->
         <div id="view-admin" class="hidden space-y-5">
-            <div class="bg-white rounded-xl shadow-xs p-1.5 overflow-x-auto flex gap-1.5 border border-slate-200">
+            <div class="admin-layout flex items-start gap-3 relative">
+                <div id="admin-nav-panel"
+                    class="admin-nav-panel bg-white rounded-xl shadow-xs p-2 flex flex-col gap-1.5 border border-slate-200">
                 <button onclick="switchAdminTab('tab-overview')" id="nav-tab-overview"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-indigo-600 text-white flex items-center gap-1.5 shrink-0 transition-all">
+                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-indigo-600 text-white flex items-center gap-2 shrink-0 transition-all text-left">
                     <i class="fa-solid fa-chart-pie"></i> Tổng Quan
                 </button>
                 <button onclick="switchAdminTab('tab-rooms')" id="nav-tab-rooms"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 shrink-0 transition-all">
+                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 transition-all text-left">
                     <i class="fa-solid fa-door-open"></i> Quản Lý Phòng
                 </button>
                 <button onclick="switchAdminTab('tab-invoices')" id="nav-tab-invoices"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 shrink-0 transition-all">
+                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 transition-all text-left">
                     <i class="fa-solid fa-receipt"></i> Lịch Sử HĐ
                 </button>
                 <button onclick="switchAdminTab('tab-payment-requests')" id="nav-tab-payment-requests"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 shrink-0 relative transition-all">
+                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
                     <i class="fa-solid fa-file-invoice-dollar"></i> Yêu Cầu HĐ <span id="badge-payment-requests"
                         class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
                 </button>
                 <button onclick="switchAdminTab('tab-issues')" id="nav-tab-issues"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 shrink-0 relative transition-all">
+                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
                     <i class="fa-solid fa-screwdriver-wrench"></i> Sự Cố <span id="badge-issues"
                         class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
                 </button>
                 <button onclick="switchAdminTab('tab-chats')" id="nav-tab-chats"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 shrink-0 relative transition-all">
+                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
                     <i class="fa-solid fa-comments"></i> Nhắn Tin <span id="badge-chats"
                         class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
                 </button>
                 <button onclick="logoutAdmin()"
-                    class="py-2.5 px-3 text-xs font-semibold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center gap-1 shrink-0 ml-auto transition-all">
+                    class="py-2.5 px-3 text-xs font-semibold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center gap-2 shrink-0 mt-auto transition-all text-left">
                     <i class="fa-solid fa-lock"></i> Khóa
                 </button>
-            </div>
+                </div>
+                <button onclick="toggleAdminNav()" id="admin-nav-toggle"
+                    class="admin-nav-toggle absolute left-0 top-4 -translate-x-1/2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center shadow-xs z-10"
+                    title="Ẩn/hiện thanh điều hướng" aria-expanded="true">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="flex-1 min-w-0 space-y-5">
+                    <span class="text-xs font-semibold text-slate-500">Bảng điều khiển Chủ Trọ</span>
 
             <!-- TAB 1: TỔNG QUAN -->
             <div id="tab-overview" class="admin-tab-content space-y-4">
-                <section class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <section class="admin-stats-grid">
                     <div
-                        class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-blue-500 flex items-center justify-between">
+                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-blue-500 flex items-center justify-between">
                         <div>
                             <p class="text-slate-500 text-[11px] font-semibold">Tổng phòng</p>
                             <h3 id="stat-total" class="text-lg font-bold text-slate-800">0</h3>
@@ -286,7 +437,7 @@
                         <i class="fa-solid fa-door-open text-xl text-blue-500/80"></i>
                     </div>
                     <div
-                        class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-emerald-500 flex items-center justify-between">
+                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-emerald-500 flex items-center justify-between">
                         <div>
                             <p class="text-slate-500 text-[11px] font-semibold">Đang thuê</p>
                             <h3 id="stat-rented" class="text-lg font-bold text-emerald-600">0</h3>
@@ -294,7 +445,7 @@
                         <i class="fa-solid fa-users text-xl text-emerald-500/80"></i>
                     </div>
                     <div
-                        class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-amber-500 flex items-center justify-between">
+                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-amber-500 flex items-center justify-between">
                         <div>
                             <p class="text-slate-500 text-[11px] font-semibold">Phòng trống</p>
                             <h3 id="stat-empty" class="text-lg font-bold text-amber-600">0</h3>
@@ -302,30 +453,52 @@
                         <i class="fa-solid fa-bed text-xl text-amber-500/80"></i>
                     </div>
                     <div
-                        class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-indigo-500 flex items-center justify-between">
+                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-indigo-500 flex items-center justify-between">
                         <div>
-                            <p class="text-slate-500 text-[11px] font-semibold">Doanh thu dự kiến</p>
+                            <p class="text-slate-500 text-[11px] font-semibold">Dự kiến tháng này</p>
                             <h3 id="stat-expected-revenue" class="text-xs sm:text-sm font-bold text-indigo-600">0 đ</h3>
                         </div>
                         <i class="fa-solid fa-calculator text-xl text-indigo-500/80"></i>
                     </div>
                     <div
-                        class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-purple-500 flex items-center justify-between col-span-2 sm:col-span-1">
+                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-purple-500 flex items-center justify-between">
                         <div>
-                            <p class="text-slate-500 text-[11px] font-semibold">Doanh thu thực thu</p>
+                            <p class="text-slate-500 text-[11px] font-semibold">Thực tế đã thu</p>
                             <h3 id="stat-revenue" class="text-xs sm:text-sm font-bold text-purple-600">0 đ</h3>
                         </div>
                         <i class="fa-solid fa-money-bill-wave text-xl text-purple-500/80"></i>
+                    </div>
+                    <div
+                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-rose-500 flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-[11px] font-semibold">Tổng nợ hiện tại</p>
+                            <h3 id="stat-debt" class="text-xs sm:text-sm font-bold text-rose-600">0 đ</h3>
+                        </div>
+                        <i class="fa-solid fa-file-invoice-dollar text-xl text-rose-500/80"></i>
+                    </div>
+                    <div
+                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-fuchsia-500 flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-[11px] font-semibold">Tổng doanh thu đã ghi nhận</p>
+                            <h3 id="stat-total-revenue" class="text-xs sm:text-sm font-bold text-fuchsia-600">0 đ</h3>
+                        </div>
+                        <i class="fa-solid fa-chart-line text-xl text-fuchsia-500/80"></i>
                     </div>
                 </section>
 
                 <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
                     <h2 class="text-sm sm:text-base font-bold text-slate-800">
-                        <i class="fa-solid fa-chart-column mr-2 text-indigo-600"></i> Biểu Đồ Doanh Thu Từng Tháng
+                    <i class="fa-solid fa-chart-column mr-2 text-indigo-600"></i> Dự Kiến Và Thực Tế Theo Tháng
                     </h2>
                     <div class="relative h-60 sm:h-72 w-full">
                         <canvas id="revenueChart"></canvas>
                     </div>
+                </section>
+                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
+                    <h2 class="text-sm sm:text-base font-bold text-slate-800">
+                        <i class="fa-solid fa-clock-rotate-left mr-2 text-rose-600"></i> Lịch Sử Công Nợ Theo Tháng
+                    </h2>
+                    <div id="debt-history-report" class="overflow-x-auto"></div>
                 </section>
 
                 <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
@@ -378,6 +551,16 @@
                                 class="text-[11px] sm:text-xs bg-slate-900 text-white px-3 py-2 rounded-lg hover:bg-slate-800 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1 ml-auto sm:ml-0">
                                 <i class="fa-solid fa-plus"></i> Thêm Phòng
                             </button>
+                            <button onclick="exportBackup('json')" class="text-[11px] bg-emerald-600 text-white px-3 py-2 rounded-lg hover:bg-emerald-700 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-download"></i> Xuất JSON
+                            </button>
+                            <button onclick="exportBackup('xlsx')" class="text-[11px] bg-cyan-600 text-white px-3 py-2 rounded-lg hover:bg-cyan-700 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-file-excel"></i> Xuất Excel
+                            </button>
+                            <button onclick="document.getElementById('backup-file-input').click()" class="text-[11px] bg-slate-100 text-slate-700 px-3 py-2 rounded-lg hover:bg-slate-200 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-upload"></i> Nhập sao lưu
+                            </button>
+                            <input id="backup-file-input" type="file" accept=".json,.xlsx,.xls" class="hidden" onchange="importBackupFile(this.files[0])">
                         </div>
                     </div>
 
@@ -467,6 +650,8 @@
                     </div>
                 </section>
             </div>
+            </div>
+        </div>
         </div>
     </main>
 
@@ -485,6 +670,7 @@
             <p>Tiền Nước: <span id="p-water"></span></p>
             <p style="font-size: 11px; color: #555; margin-left: 10px; margin-top: -2px;" id="p-water-desc"></p>
             <p>Dịch vụ khác: <span id="p-service"></span></p>
+            <p id="p-debt-row">Nợ kỳ trước: <span id="p-debt"></span></p>
             <hr style="border: 0; border-top: 1px solid #ddd; margin: 8px 0;">
             <p style="font-size: 14px; font-weight: bold;">TỔNG CỘNG: <span id="p-total" style="color: #4f46e5;"></span>
             </p>
@@ -520,6 +706,10 @@
                 <input type="text" id="tenant-chat-input" placeholder="Nhập nội dung tin nhắn..."
                     class="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:border-cyan-600 bg-white"
                     onkeypress="if(event.key==='Enter') sendTenantMessage()">
+                <label class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs cursor-pointer" title="Gửi hình ảnh">
+                    <i class="fa-solid fa-image"></i>
+                    <input type="file" id="tenant-chat-image" accept="image/*" class="hidden">
+                </label>
                 <button onclick="sendTenantMessage()"
                     class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all active:scale-95">
                     <i class="fa-solid fa-paper-plane"></i> Gửi
@@ -569,6 +759,28 @@
                                 class="w-full px-3 py-2 text-xs bg-transparent text-center font-bold"
                                 onfocus="handleNumFocus(this)" onblur="handleNumBlur(this, 1)"
                                 oninput="calculateTotal()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-50/60 p-3 rounded-xl border border-indigo-100 space-y-2">
+                    <span class="font-bold text-slate-700 text-xs block"><i class="fa-solid fa-file-signature mr-1 text-indigo-600"></i>Thông tin hợp đồng & tiền cọc</span>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] font-bold mb-1 text-slate-700">Số hợp đồng:</label>
+                            <input type="text" id="room-contract-number" maxlength="100" class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold mb-1 text-slate-700">Tiền cọc (đ):</label>
+                            <input type="text" id="room-deposit" maxlength="20" value="0" onfocus="handleNumFocus(this)" onblur="handleNumBlur(this, 0)" oninput="formatAndCalculate(this)" class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold mb-1 text-slate-700">Ngày bắt đầu:</label>
+                            <input type="date" id="room-start-date" class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold mb-1 text-slate-700">Ngày kết thúc:</label>
+                            <input type="date" id="room-end-date" class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
                         </div>
                     </div>
                 </div>
@@ -732,6 +944,13 @@
                 <textarea id="issue-text" rows="3" class="w-full p-2.5 text-xs bg-transparent"
                     placeholder="Mô tả chi tiết sự cố bạn gặp phải (VD: Hỏng bóng đèn, nghẹt nước...)..."></textarea>
             </div>
+            <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                <i class="fa-solid fa-image text-amber-600"></i>
+                <span>Đính kèm hình ảnh (tùy chọn)</span>
+                <input type="file" id="issue-image" accept="image/*" class="hidden"
+                    onchange="document.getElementById('issue-image-name').innerText = this.files[0]?.name || ''">
+            </label>
+            <p id="issue-image-name" class="text-[11px] text-slate-400"></p>
             <div class="flex justify-end gap-2 pt-1">
                 <button type="button" onclick="closeIssueModal()"
                     class="bg-slate-100 px-3.5 py-2 rounded-lg text-xs font-semibold hover:bg-slate-200 transition-all active:scale-95">Hủy</button>
@@ -746,6 +965,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, get, set, remove, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD-_W9YnybWOgWYbP2jydZWVpW0KabE-Y8",
@@ -764,9 +984,16 @@
         };
 
         const MAX_ROOMS = 12;
+        const MAX_TEXT_LENGTH = 500;
+        const MAX_COLLECTION_ITEMS = 1000;
+        const MAX_BACKUP_BYTES = 5 * 1024 * 1024;
+        const MAX_RECORD_BYTES = 250000;
+        const ADMIN_SESSION_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
+        const firebaseAuthConfigured = Boolean(firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId);
 
         let roomsData = [];
         let issuesData = [];
@@ -778,6 +1005,52 @@
         let currentEditingDocId = null;
         let revenueChartInstance = null;
         let selectedAdminChatRoomId = null;
+        let adminUser = null;
+
+        function esc(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[char]));
+        }
+
+        function boundedText(value, max = MAX_TEXT_LENGTH) {
+            return String(value ?? '').trim().slice(0, max);
+        }
+
+        function assertRecordSize(value) {
+            const size = new Blob([JSON.stringify(value)]).size;
+            if (size > MAX_RECORD_BYTES) throw new Error('Dữ liệu bản ghi vượt quá giới hạn cho phép.');
+        }
+
+        function currentMonthKey(date = new Date()) {
+            return `${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+        }
+
+        function authRequiredMessage() {
+            return firebaseAuthConfigured
+                ? 'Vui lòng đăng nhập bằng tài khoản email/password Firebase đã được cấp quyền.'
+                : 'Firebase Authentication chưa được cấu hình (kiểm tra firebaseConfig và bật Email/Password trong Firebase Console). Chưa có mật khẩu dự phòng hardcode.';
+        }
+
+        onAuthStateChanged(auth, async user => {
+            const loginAt = Number(localStorage.getItem('adminLoginAt') || 0);
+            if (user && loginAt > 0 && Date.now() - loginAt >= ADMIN_SESSION_MAX_AGE) {
+                await signOut(auth);
+                localStorage.removeItem('adminLoginAt');
+                sessionStorage.removeItem('isAdminLoggedIn');
+                Toast.fire({ icon: 'info', title: 'Phiên đăng nhập đã hết hạn sau 30 ngày.' });
+                return;
+            }
+
+            adminUser = user || null;
+            if (user) {
+                localStorage.setItem('adminLoginAt', String(loginAt || Date.now()));
+                sessionStorage.setItem('isAdminLoggedIn', 'true');
+            } else {
+                localStorage.removeItem('adminLoginAt');
+                sessionStorage.removeItem('isAdminLoggedIn');
+            }
+        });
 
         const Toast = Swal.mixin({
             toast: true,
@@ -835,6 +1108,50 @@
             const cleanStr = v.toString().replace(/,/g, "").replace(/^0+(?=\d)/, "");
             return Number(cleanStr) || 0;
         };
+
+        const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+        const MAX_IMAGE_DATA_LENGTH = 900000;
+
+        function readImageAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) return resolve('');
+                if (!file.type.startsWith('image/')) {
+                    reject(new Error('Tệp đính kèm phải là hình ảnh.'));
+                    return;
+                }
+                if (file.size > MAX_IMAGE_BYTES) {
+                    reject(new Error('Hình ảnh không được vượt quá 5 MB.'));
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const image = new Image();
+                    image.onload = () => {
+                        const scale = Math.min(1, 1280 / Math.max(image.width, image.height));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.max(1, Math.round(image.width * scale));
+                        canvas.height = Math.max(1, Math.round(image.height * scale));
+                        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+                        if (dataUrl.length > MAX_IMAGE_DATA_LENGTH) {
+                            reject(new Error('Hình ảnh sau khi nén vẫn quá lớn. Vui lòng chọn ảnh nhỏ hơn.'));
+                            return;
+                        }
+                        resolve(dataUrl);
+                    };
+                    image.onerror = () => reject(new Error('Không thể đọc hình ảnh đã chọn.'));
+                    image.src = reader.result;
+                };
+                reader.onerror = () => reject(new Error('Không thể đọc tệp hình ảnh.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function imagePreviewHtml(image, alt = 'Hình ảnh đính kèm') {
+            if (!image || !/^data:image\/[a-z0-9.+-]+;base64,/i.test(String(image))) return '';
+            return `<a href="${esc(image)}" target="_blank" rel="noopener"><img src="${esc(image)}" alt="${esc(alt)}" class="max-w-full max-h-48 rounded-lg border border-slate-200 object-contain mt-1"></a>`;
+        }
 
         function extractRoomNumber(name) {
             const match = (name || "").match(/\d+/);
@@ -906,38 +1223,80 @@
             if (tabId === 'tab-chats') renderAdminChatRoomList();
         };
 
-        window.toggleAdminMode = function () {
-            if (sessionStorage.getItem("isAdminLoggedIn") === "true") {
+        window.toggleAdminNav = function () {
+            const panel = document.getElementById('admin-nav-panel');
+            const toggle = document.getElementById('admin-nav-toggle');
+            if (!panel || !toggle) return;
+            const collapsed = panel.classList.toggle('is-collapsed');
+            toggle.classList.toggle('is-collapsed', collapsed);
+            toggle.setAttribute('aria-expanded', String(!collapsed));
+            toggle.title = collapsed ? 'Hiện thanh điều hướng' : 'Ẩn thanh điều hướng';
+            localStorage.setItem('adminNavCollapsed', String(collapsed));
+        };
+
+        function restoreAdminNavState() {
+            const collapsed = localStorage.getItem('adminNavCollapsed') === 'true';
+            const panel = document.getElementById('admin-nav-panel');
+            const toggle = document.getElementById('admin-nav-toggle');
+            if (!collapsed || !panel || !toggle) return;
+            panel.classList.add('is-collapsed');
+            toggle.classList.add('is-collapsed');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.title = 'Hiện thanh điều hướng';
+        }
+
+        window.toggleAdminMode = async function () {
+            if (adminUser) {
                 showAdminView();
             } else {
-                Swal.fire({
-                    title: 'Đăng nhập Quản trị',
-                    input: 'password',
-                    inputPlaceholder: 'Nhập mật khẩu',
+                if (!firebaseAuthConfigured) {
+                    return Swal.fire({ title: 'Chưa cấu hình đăng nhập', text: authRequiredMessage(), icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+                }
+                const result = await Swal.fire({
+                    title: 'Đăng nhập Quản trị Firebase',
+                    html: `<input id="firebase-email" type="email" class="swal2-input text-sm" placeholder="Email">
+                        <input id="firebase-password" type="password" class="swal2-input text-sm" placeholder="Mật khẩu">
+                        <label class="flex items-center justify-center gap-2 text-xs text-slate-600 mt-2 cursor-pointer">
+                            <input id="firebase-remember" type="checkbox" class="accent-indigo-600" ${localStorage.getItem('adminRememberLogin') !== 'false' ? 'checked' : ''}>
+                            <span>Ghi nhớ đăng nhập trong 30 ngày</span>
+                        </label>`,
                     showCancelButton: true,
                     confirmButtonText: 'Đăng nhập',
                     cancelButtonText: 'Hủy',
                     confirmButtonColor: '#4f46e5',
                     customClass: { popup: 'rounded-xl text-xs' }
-                }).then((res) => {
-                    if (res.isConfirmed && res.value === "2541") {
-                        sessionStorage.setItem("isAdminLoggedIn", "true");
-                        showAdminView();
-                    } else if (res.isConfirmed) {
-                        Swal.fire({ title: 'Lỗi', text: 'Mật khẩu không chính xác!', icon: 'error', customClass: { popup: 'rounded-xl text-xs' } });
-                    }
                 });
+                if (!result.isConfirmed) return;
+                const email = document.getElementById('firebase-email')?.value.trim();
+                const password = document.getElementById('firebase-password')?.value;
+                const remember = document.getElementById('firebase-remember')?.checked === true;
+                if (!email || !password) return Swal.fire({ title: 'Thiếu thông tin', text: 'Vui lòng nhập email và mật khẩu.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+                try {
+                    showLoading();
+                    await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+                    await signInWithEmailAndPassword(auth, email, password);
+                    localStorage.setItem('adminRememberLogin', String(remember));
+                    if (remember) localStorage.setItem('adminLoginAt', String(Date.now()));
+                    else localStorage.removeItem('adminLoginAt');
+                    showAdminView();
+                } catch (error) {
+                    notifyError(error, 'Đăng nhập thất bại');
+                } finally {
+                    hideLoading();
+                }
             }
         };
 
         function showAdminView() {
             document.getElementById('view-admin').classList.remove('hidden');
             document.getElementById('view-tenant').classList.add('hidden');
+            restoreAdminNavState();
             loadRoomsAdmin();
         }
 
-        window.logoutAdmin = function () {
-            sessionStorage.removeItem("isAdminLoggedIn");
+        window.logoutAdmin = async function () {
+            try { await signOut(auth); } catch (error) { notifyError(error, 'Đăng xuất thất bại'); }
+            localStorage.removeItem('adminLoginAt');
             switchView('tenant');
         };
 
@@ -998,7 +1357,9 @@
 
             const waterInfo = calculateWater(room);
             const service = parseNum(room.service);
-            const total = price + elecTotal + waterInfo.total + service;
+            const currentTotal = price + elecTotal + waterInfo.total + service;
+            const debt = parseNum(room.debt);
+            const total = currentTotal + debt;
 
             return {
                 price,
@@ -1009,6 +1370,8 @@
                 waterTotal: waterInfo.total,
                 waterBreakdown: waterInfo.breakdown,
                 service,
+                currentTotal,
+                debt,
                 total
             };
         }
@@ -1029,6 +1392,9 @@
 
         function getMonthlyRevenueData() {
             const monthlyData = {};
+            const now = new Date();
+            const currentMonthKey = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            const currentMonthInvoices = new Set();
 
             invoicesData.forEach(inv => {
                 if (inv.status === 'Đã thanh toán') {
@@ -1036,19 +1402,18 @@
                     if (mKey) {
                         if (!monthlyData[mKey]) monthlyData[mKey] = { expected: 0, paid: 0 };
                         monthlyData[mKey].paid += parseNum(inv.total);
+                        if (mKey === currentMonthKey) currentMonthInvoices.add(inv.roomName);
                     }
                 }
             });
 
-            const now = new Date();
-            const currentMonthKey = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
             if (!monthlyData[currentMonthKey]) monthlyData[currentMonthKey] = { expected: 0, paid: 0 };
 
             roomsData.forEach(room => {
                 if (room.status === 'Đang thuê') {
                     const details = getRoomTotalDetails(room);
                     monthlyData[currentMonthKey].expected += details.total;
-                    if (room.paymentStatus === 'Đã thanh toán') {
+                    if (room.paymentStatus === 'Đã thanh toán' && !currentMonthInvoices.has(room.name)) {
                         monthlyData[currentMonthKey].paid += details.total;
                     }
                 }
@@ -1061,6 +1426,59 @@
             });
 
             return monthlyData;
+        }
+
+        function getCurrentRevenueSummary() {
+            const summary = { expected: 0, paid: 0 };
+            roomsData.forEach(room => {
+                if (room.status !== 'Đang thuê') return;
+                const details = getRoomTotalDetails(room);
+                summary.expected += details.total;
+                if (room.paymentStatus === 'Đã thanh toán') summary.paid += details.total;
+            });
+            return summary;
+        }
+
+        function getOutstandingDebt() {
+            return roomsData.reduce((sum, room) => sum + Math.max(0, parseNum(room.debt)), 0);
+        }
+
+        function getRecordedRevenue() {
+            return invoicesData.filter(invoice => invoice.status === 'Đã thanh toán')
+                .reduce((sum, invoice) => sum + Math.max(0, parseNum(invoice.total)), 0);
+        }
+
+        function getDebtHistoryRows() {
+            const rows = [];
+            roomsData.forEach(room => {
+                (Array.isArray(room.debtHistory) ? room.debtHistory : []).forEach(item => {
+                    const amount = Math.max(0, parseNum(item.amount));
+                    if (amount > 0) rows.push({ month: item.month || '--', roomName: room.name, amount });
+                });
+            });
+            return rows.sort((a, b) => String(b.month).localeCompare(String(a.month)));
+        }
+
+        function renderDebtHistory() {
+            const container = document.getElementById('debt-history-report');
+            if (!container) return;
+            const rows = getDebtHistoryRows();
+            if (!rows.length) {
+                container.innerHTML = '<p class="text-center text-xs text-slate-400 py-3">Chưa có khoản nợ được chốt theo tháng.</p>';
+                return;
+            }
+            const grouped = {};
+            rows.forEach(row => {
+                if (!grouped[row.month]) grouped[row.month] = { total: 0, rooms: [] };
+                grouped[row.month].total += row.amount;
+                grouped[row.month].rooms.push(row);
+            });
+            container.innerHTML = `<table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+                <thead class="bg-slate-50 text-slate-700 font-bold"><tr><th class="p-2.5">Tháng</th><th class="p-2.5">Phòng</th><th class="p-2.5 text-right">Công nợ chốt</th></tr></thead>
+                <tbody class="divide-y divide-slate-100">${Object.keys(grouped).map(month => grouped[month].rooms.map(row =>
+                    `<tr><td class="p-2.5">${esc(month)}</td><td class="p-2.5">${esc(row.roomName)}</td><td class="p-2.5 text-right font-semibold text-rose-600">${row.amount.toLocaleString('vi-VN')} đ</td></tr>`
+                ).join('') + `<tr class="bg-rose-50/50 font-bold"><td class="p-2.5" colspan="2">Tổng ${esc(month)}</td><td class="p-2.5 text-right text-rose-600">${grouped[month].total.toLocaleString('vi-VN')} đ</td></tr>`).join('')}</tbody>
+            </table>`;
         }
 
         function renderOverviewAnalytics() {
@@ -1151,6 +1569,11 @@
             }
 
             renderRevenueComparison();
+            renderDebtHistory();
+            const debtEl = document.getElementById('stat-debt');
+            if (debtEl) debtEl.innerText = getOutstandingDebt().toLocaleString('vi-VN') + ' đ';
+            const revenueEl = document.getElementById('stat-total-revenue');
+            if (revenueEl) revenueEl.innerText = getRecordedRevenue().toLocaleString('vi-VN') + ' đ';
         }
 
         window.renderRevenueComparison = function () {
@@ -1200,7 +1623,7 @@
                 roomsData = [];
                 if (roomSnap.exists()) {
                     const data = roomSnap.val();
-                    Object.keys(data).forEach(k => roomsData.push({ docId: k, ...data[k] }));
+                    Object.keys(data).slice(0, MAX_ROOMS).forEach(k => roomsData.push({ docId: k, ...data[k] }));
 
                     const normalizeTasks = [];
                     roomsData.forEach(room => {
@@ -1210,20 +1633,30 @@
                             tenant: room.tenant,
                             occupants: room.occupants,
                             phone: room.phone,
-                            paymentStatus: room.paymentStatus
+                            paymentStatus: room.paymentStatus,
+                            debt: room.debt
                         });
 
-                        room.name = String(room.name || '').trim();
+                        room.name = boundedText(room.name, 100);
                         room.status = room.status === 'Đang thuê' ? 'Đang thuê' : 'Trống';
                         if (room.status === 'Trống') {
                             room.tenant = '';
                             room.occupants = 0;
                             room.phone = '';
                             room.paymentStatus = 'Chưa thanh toán';
+                            room.debt = 0;
                         } else if (room.status === 'Đang thuê') {
-                            room.tenant = (room.tenant || '').trim();
+                            room.tenant = boundedText(room.tenant, 150);
                             room.occupants = Math.max(1, parseNum(room.occupants));
+                            room.debt = Math.max(0, parseNum(room.debt));
                         }
+                        room.phone = boundedText(room.phone, 30);
+                        room.note = boundedText(room.note);
+                        room.contractNumber = boundedText(room.contractNumber, 100);
+                        room.deposit = Math.max(0, parseNum(room.deposit));
+                        room.startDate = typeof room.startDate === 'string' ? room.startDate.slice(0, 10) : '';
+                        room.endDate = typeof room.endDate === 'string' ? room.endDate.slice(0, 10) : '';
+                        room.debtHistory = Array.isArray(room.debtHistory) ? room.debtHistory.slice(-120) : [];
 
                         const normalized = JSON.stringify({
                             name: room.name,
@@ -1231,7 +1664,8 @@
                             tenant: room.tenant,
                             occupants: room.occupants,
                             phone: room.phone,
-                            paymentStatus: room.paymentStatus
+                            paymentStatus: room.paymentStatus,
+                            debt: room.debt
                         });
 
                         if (original !== normalized) {
@@ -1247,7 +1681,7 @@
                 issuesData = [];
                 if (issuesSnap.exists()) {
                     const data = issuesSnap.val();
-                    Object.keys(data).forEach(k => issuesData.push({ id: k, ...data[k] }));
+                    Object.keys(data).slice(0, MAX_COLLECTION_ITEMS).forEach(k => issuesData.push({ id: k, ...data[k] }));
                 }
                 updateIssueBadge();
 
@@ -1255,14 +1689,14 @@
                 invoicesData = [];
                 if (invoicesSnap.exists()) {
                     const data = invoicesSnap.val();
-                    Object.keys(data).forEach(k => invoicesData.push({ id: k, ...data[k] }));
+                    Object.keys(data).slice(0, MAX_COLLECTION_ITEMS).forEach(k => invoicesData.push({ id: k, ...data[k] }));
                 }
 
                 const requestSnap = await get(child(dbRef, "invoiceRequests"));
                 paymentRequestsData = [];
                 if (requestSnap.exists()) {
                     const data = requestSnap.val();
-                    Object.keys(data).forEach(k => paymentRequestsData.push({ id: k, ...data[k] }));
+                    Object.keys(data).slice(0, MAX_COLLECTION_ITEMS).forEach(k => paymentRequestsData.push({ id: k, ...data[k] }));
                 }
                 updatePaymentRequestBadge();
 
@@ -1273,9 +1707,10 @@
                     Object.keys(rawChats).forEach(roomDocId => {
                         chatsData[roomDocId] = [];
                         const roomMsgs = rawChats[roomDocId];
-                        Object.keys(roomMsgs).forEach(msgId => {
+                        if (!roomMsgs || typeof roomMsgs !== 'object') return;
+                        Object.keys(roomMsgs).slice(0, MAX_COLLECTION_ITEMS).forEach(msgId => {
                             const msg = roomMsgs[msgId];
-                            chatsData[roomDocId].push({ id: msgId, ...msg });
+                            chatsData[roomDocId].push({ id: msgId, ...msg, text: boundedText(msg.text) });
                         });
                         chatsData[roomDocId].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
                     });
@@ -1295,9 +1730,9 @@
                 const msgs = [];
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    Object.keys(data).forEach(msgId => {
+                    Object.keys(data).slice(0, MAX_COLLECTION_ITEMS).forEach(msgId => {
                         const m = data[msgId];
-                        msgs.push({ id: msgId, ...m });
+                        msgs.push({ id: msgId, ...m, text: boundedText(m.text) });
                     });
                     msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
                 }
@@ -1361,6 +1796,13 @@
             document.getElementById('t-room-name').innerText = room.name;
             document.getElementById('t-tenant-name').innerText = room.tenant || 'Chưa cập nhật';
             document.getElementById('t-occupants').innerText = room.occupants || 1;
+            const contractInfo = document.getElementById('t-contract-info');
+            const contractParts = [];
+            if (room.contractNumber) contractParts.push(`HĐ: ${room.contractNumber}`);
+            if (parseNum(room.deposit) > 0) contractParts.push(`Cọc: ${parseNum(room.deposit).toLocaleString('vi-VN')} đ`);
+            if (room.startDate || room.endDate) contractParts.push(`${room.startDate || '--'} → ${room.endDate || '--'}`);
+            contractInfo.innerText = contractParts.join(' • ');
+            contractInfo.classList.toggle('hidden', contractParts.length === 0);
 
             const isPaid = room.paymentStatus === "Đã thanh toán";
             const badge = document.getElementById('t-payment-status-badge');
@@ -1373,6 +1815,8 @@
             document.getElementById('t-water-total').innerText = details.waterTotal.toLocaleString('vi-VN') + ' đ';
             document.getElementById('t-water-desc').innerText = details.waterQtyDesc;
             document.getElementById('t-service').innerText = details.service.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('t-debt').innerText = details.debt.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('tenant-debt-row').classList.toggle('hidden', details.debt <= 0);
             document.getElementById('t-total').innerText = details.total.toLocaleString('vi-VN') + ' đ';
 
             const rejectionNotice = document.getElementById('tenant-rejection-notice');
@@ -1390,17 +1834,30 @@
             }
 
             const actionBtn = document.getElementById('tenant-invoice-action');
-            if (activeInvoiceRequest?.status === 'approved' && isPaid) {
+            const existingInvoice = findInvoiceForRequest(activeInvoiceRequest, room);
+            if (existingInvoice) {
+                actionBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Đã in - Liên hệ Chủ Trọ';
+                actionBtn.onclick = null;
+                actionBtn.disabled = true;
+                actionBtn.title = 'Hóa đơn đã có trong lịch sử. Chỉ Chủ Trọ được phép in lại.';
+                actionBtn.className = 'bg-slate-300 text-slate-600 text-[11px] font-semibold py-2.5 px-2 rounded-lg shadow-xs flex items-center justify-center gap-1 cursor-not-allowed';
+            } else if (activeInvoiceRequest?.status === 'approved' && isPaid) {
                 actionBtn.innerHTML = '<i class="fa-solid fa-print"></i> In Hóa Đơn';
                 actionBtn.onclick = (e) => printInvoice(e);
+                actionBtn.disabled = false;
+                actionBtn.title = '';
                 actionBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold py-2.5 px-2 rounded-lg shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95';
             } else if (activeInvoiceRequest?.status === 'pending') {
                 actionBtn.innerHTML = '<i class="fa-solid fa-clock"></i> Chờ Admin';
                 actionBtn.onclick = (e) => requestInvoice(e);
+                actionBtn.disabled = false;
+                actionBtn.title = '';
                 actionBtn.className = 'bg-slate-400 text-white text-[11px] font-semibold py-2.5 px-2 rounded-lg shadow-xs flex items-center justify-center gap-1 cursor-not-allowed';
             } else {
                 actionBtn.innerHTML = '<i class="fa-solid fa-file-circle-plus"></i> Yêu cầu HĐ';
                 actionBtn.onclick = (e) => requestInvoice(e);
+                actionBtn.disabled = false;
+                actionBtn.title = '';
                 actionBtn.className = 'bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold py-2.5 px-2 rounded-lg shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95';
             }
 
@@ -1413,11 +1870,11 @@
                 paymentBox.innerHTML = `
                     <div class="text-center space-y-2">
                         <p class="text-xs font-bold text-slate-700">Mã QR Chuyển Khoản Techcombank</p>
-                        <img src="${qrUrl}" class="w-48 h-48 mx-auto border border-slate-100 p-1 rounded-lg shadow-xs object-contain">
+                        <img src="${esc(qrUrl)}" class="w-48 h-48 mx-auto border border-slate-100 p-1 rounded-lg shadow-xs object-contain">
                         <div class="bg-slate-50 p-3 rounded-lg text-xs text-left border border-slate-200 space-y-1">
-                            <p><strong>Chủ tài khoản:</strong> ${BANK_CONFIG.accountName}</p>
-                            <p><strong>Số tài khoản:</strong> ${BANK_CONFIG.accountNo}</p>
-                            <p class="text-indigo-600 font-semibold"><strong>Nội dung:</strong> ${memo}</p>
+                            <p><strong>Chủ tài khoản:</strong> ${esc(BANK_CONFIG.accountName)}</p>
+                            <p><strong>Số tài khoản:</strong> ${esc(BANK_CONFIG.accountNo)}</p>
+                            <p class="text-indigo-600 font-semibold"><strong>Nội dung:</strong> ${esc(memo)}</p>
                         </div>
                         <p class="text-[11px] text-amber-700 font-medium">Sau khi chuyển khoản hoặc nộp tiền mặt, hãy bấm “Yêu cầu HĐ” để báo Chủ Trọ kiểm tra.</p>
                     </div>
@@ -1449,13 +1906,14 @@
                 return `
                     <div class="flex flex-col ${isAdmin ? 'items-start' : 'items-end'} mb-2 group">
                         <div class="flex items-center gap-1.5 mb-0.5">
-                            <span class="text-[10px] text-slate-400">${isAdmin ? 'Chủ Trọ' : (activeTenantRoom.tenant || 'Bạn')} • ${new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span class="text-[10px] text-slate-400">${isAdmin ? 'Chủ Trọ' : esc(activeTenantRoom.tenant || 'Bạn')} • ${new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             <button onclick="deleteSingleMessage('${activeTenantRoom.docId}', '${m.id}')" class="text-rose-400 hover:text-rose-600 text-[10px] opacity-0 group-hover:opacity-150 transition-opacity" title="Xóa tin nhắn">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
                         <div class="max-w-[80%] p-2.5 rounded-xl text-xs ${isAdmin ? 'bg-white text-slate-800 border border-slate-200' : 'bg-cyan-600 text-white'}">
-                            ${m.text}
+                            ${m.text ? `<div>${esc(m.text)}</div>` : ''}
+                            ${imagePreviewHtml(m.image)}
                         </div>
                     </div>
                 `;
@@ -1465,18 +1923,25 @@
 
         window.sendTenantMessage = async function () {
             const input = document.getElementById('tenant-chat-input');
-            const text = input.value.trim();
-            if (!text || !activeTenantRoom) return;
+            const imageInput = document.getElementById('tenant-chat-image');
+            const text = boundedText(input.value);
+            if ((!text && !imageInput?.files?.length) || !activeTenantRoom) return;
 
-            const msgId = 'msg_' + Date.now();
-            const msgObj = {
-                sender: 'tenant',
-                senderName: activeTenantRoom.tenant || 'Khách thuê',
-                text: text,
-                timestamp: Date.now()
-            };
-            input.value = '';
-            await set(ref(db, `chats/${activeTenantRoom.docId}/${msgId}`), msgObj);
+            await executeWithLock(null, async () => {
+                const image = await readImageAsDataUrl(imageInput.files[0]);
+                const msgId = 'msg_' + Date.now();
+                const msgObj = {
+                    sender: 'tenant',
+                    senderName: activeTenantRoom.tenant || 'Khách thuê',
+                    text: text,
+                    image,
+                    timestamp: Date.now()
+                };
+                assertRecordSize(msgObj);
+                await set(ref(db, `chats/${activeTenantRoom.docId}/${msgId}`), msgObj);
+                input.value = '';
+                imageInput.value = '';
+            });
         };
 
         function renderAdminChatRoomList() {
@@ -1498,10 +1963,10 @@
                 return `
                     <div onclick="selectAdminChatRoom('${room.docId}')" class="p-2.5 rounded-lg cursor-pointer transition-all border ${isSelected ? 'bg-indigo-50 border-indigo-200 shadow-xs' : 'bg-white border-slate-200 hover:bg-slate-100'}">
                         <div class="flex justify-between items-center">
-                            <span class="font-bold text-slate-800 text-xs">${room.name}</span>
+                            <span class="font-bold text-slate-800 text-xs">${esc(room.name)}</span>
                             ${hasUnread ? '<span class="w-2 h-2 rounded-full bg-rose-500"></span>' : ''}
                         </div>
-                        <p class="text-[11px] text-slate-500 truncate mt-0.5">${room.tenant || 'Khách'} ${lastMsg ? '• ' + lastMsg.text : ''}</p>
+                        <p class="text-[11px] text-slate-500 truncate mt-0.5">${esc(room.tenant || 'Khách')} ${lastMsg ? '• ' + esc(lastMsg.text) : ''}</p>
                     </div>
                 `;
             }).join('');
@@ -1518,8 +1983,8 @@
             container.innerHTML = `
                 <div class="flex justify-between items-center border-b border-slate-200 pb-2 mb-2">
                     <div>
-                        <h4 class="font-bold text-xs text-slate-900">${room.name} - ${room.tenant || 'Khách thuê'}</h4>
-                        <p class="text-[10px] text-slate-500">SĐT: ${room.phone || 'Chưa cập nhật'}</p>
+                        <h4 class="font-bold text-xs text-slate-900">${esc(room.name)} - ${esc(room.tenant || 'Khách thuê')}</h4>
+                        <p class="text-[10px] text-slate-500">SĐT: ${esc(room.phone || 'Chưa cập nhật')}</p>
                     </div>
                     <span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded font-semibold border border-indigo-100">Đang trò chuyện</span>
                 </div>
@@ -1528,6 +1993,10 @@
                     <input type="text" id="admin-chat-input" placeholder="Nhập tin nhắn trả lời..."
                         class="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:border-indigo-600 bg-white"
                         onkeypress="if(event.key==='Enter') sendAdminMessage()">
+                    <label class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs cursor-pointer" title="Gửi hình ảnh">
+                        <i class="fa-solid fa-image"></i>
+                        <input type="file" id="admin-chat-image" accept="image/*" class="hidden">
+                    </label>
                     <button onclick="sendAdminMessage()"
                         class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all active:scale-95">
                         <i class="fa-solid fa-paper-plane"></i> Gửi
@@ -1550,10 +2019,11 @@
                                 <button onclick="deleteSingleMessage('${roomDocId}', '${m.id}')" class="text-rose-400 hover:text-rose-600 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity" title="Xóa tin nhắn">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
-                                <span class="text-[10px] text-slate-400">${isAdmin ? 'Bạn (Chủ Trọ)' : room.tenant} • ${new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span class="text-[10px] text-slate-400">${isAdmin ? 'Bạn (Chủ Trọ)' : esc(room.tenant)} • ${new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <div class="max-w-[80%] p-2.5 rounded-xl text-xs ${isAdmin ? 'bg-indigo-600 text-white' : 'bg-white text-slate-800 border border-slate-200'}">
-                                ${m.text}
+                                ${m.text ? `<div>${esc(m.text)}</div>` : ''}
+                                ${imagePreviewHtml(m.image)}
                             </div>
                         </div>
                     `;
@@ -1564,19 +2034,26 @@
 
         window.sendAdminMessage = async function () {
             const input = document.getElementById('admin-chat-input');
-            const text = input.value.trim();
-            if (!text || !selectedAdminChatRoomId) return;
+            const imageInput = document.getElementById('admin-chat-image');
+            const text = boundedText(input.value);
+            if ((!text && !imageInput?.files?.length) || !selectedAdminChatRoomId) return;
 
-            const msgId = 'msg_' + Date.now();
-            const msgObj = {
-                sender: 'admin',
-                senderName: 'Chủ Trọ',
-                text: text,
-                timestamp: Date.now()
-            };
-            input.value = '';
-            await set(ref(db, `chats/${selectedAdminChatRoomId}/${msgId}`), msgObj);
-            renderAdminChatRoomList();
+            await executeWithLock(null, async () => {
+                const image = await readImageAsDataUrl(imageInput.files[0]);
+                const msgId = 'msg_' + Date.now();
+                const msgObj = {
+                    sender: 'admin',
+                    senderName: 'Chủ Trọ',
+                    text: text,
+                    image,
+                    timestamp: Date.now()
+                };
+                assertRecordSize(msgObj);
+                await set(ref(db, `chats/${selectedAdminChatRoomId}/${msgId}`), msgObj);
+                input.value = '';
+                imageInput.value = '';
+                renderAdminChatRoomList();
+            });
         };
 
         // Chức năng xóa một tin nhắn cụ thể
@@ -1679,15 +2156,16 @@
                 const request = {
                     id: requestId,
                     roomDocId: room.docId,
-                    roomName: room.name,
-                    tenantName: room.tenant || 'Khách',
-                    phone: room.phone || '',
+                    roomName: boundedText(room.name, 100),
+                    tenantName: boundedText(room.tenant || 'Khách', 150),
+                    phone: boundedText(room.phone, 30),
                     total: getRoomTotalDetails(room).total,
                     paymentMethod: result.value,
                     status: 'pending',
                     createdAt: Date.now(),
                     createdDate: new Date().toLocaleString('vi-VN')
                 };
+                assertRecordSize(request);
                 await set(ref(db, 'invoiceRequests/' + requestId), request);
                 await loadAllData();
                 activeInvoiceRequest = request;
@@ -1721,20 +2199,31 @@
             }
 
             const details = getRoomTotalDetails(room);
-            const existingInvoice = invoicesData.find(inv => inv.requestId === request.id);
+            const existingInvoice = findInvoiceForRequest(request, room);
+            if (existingInvoice) {
+                return Swal.fire({
+                    title: 'Hóa đơn đã được in',
+                    text: 'Hóa đơn này đã có trong lịch sử. Chỉ Chủ Trọ mới có thể in lại.',
+                    icon: 'info',
+                    customClass: { popup: 'rounded-xl text-xs' }
+                });
+            }
 
-            document.getElementById('print-date').innerText = 'Ngày lập: ' + new Date().toLocaleDateString('vi-VN');
-            document.getElementById('p-room').innerText = room.name;
-            document.getElementById('p-tenant').innerText = room.tenant || '---';
-            document.getElementById('p-occupants').innerText = room.occupants || 1;
-            document.getElementById('p-price').innerText = details.price.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('p-elec-qty').innerText = details.elecQty;
-            document.getElementById('p-elec').innerText = details.elecTotal.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('p-water').innerText = details.waterTotal.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('p-water-desc').innerText = `(${details.waterQtyDesc})`;
-            document.getElementById('p-service').innerText = details.service.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('p-total').innerText = details.total.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('p-status').innerText = room.paymentStatus || 'Chưa thanh toán';
+            preparePrintArea({
+                roomName: room.name,
+                tenantName: room.tenant,
+                occupants: room.occupants,
+                price: details.price,
+                elecQty: details.elecQty,
+                elecTotal: details.elecTotal,
+                waterTotal: details.waterTotal,
+                waterQtyDesc: details.waterQtyDesc,
+                service: details.service,
+                debt: details.debt,
+                total: details.total,
+                status: room.paymentStatus,
+                createdDate: new Date().toLocaleString('vi-VN')
+            });
 
             await executeWithLock(btn, async () => {
                 if (existingInvoice) {
@@ -1749,8 +2238,17 @@
                     requestId: request.id,
                     roomName: room.name,
                     tenantName: room.tenant || 'Chưa cập nhật',
+                    occupants: room.occupants || 1,
+                    price: details.price,
+                    elecQty: details.elecQty,
+                    elecTotal: details.elecTotal,
+                    waterTotal: details.waterTotal,
+                    waterQtyDesc: details.waterQtyDesc,
+                    service: details.service,
+                    debt: details.debt,
                     total: details.total,
                     status: room.paymentStatus || 'Chưa thanh toán',
+                    createdAt: Date.now(),
                     createdDate: new Date().toLocaleString('vi-VN')
                 };
                 await set(ref(db, 'invoices/' + invoiceId), invoiceData);
@@ -1762,6 +2260,32 @@
             });
         };
 
+        function findInvoiceForRequest(request, room) {
+            if (!request || !room) return null;
+            return invoicesData.find(inv => inv.requestId === request.id) ||
+                invoicesData
+                    .filter(inv => inv.roomName === room.name && inv.tenantName === (room.tenant || 'Chưa cập nhật'))
+                    .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0] ||
+                null;
+        }
+
+        function preparePrintArea(invoice) {
+            document.getElementById('print-date').innerText = 'Ngày lập: ' + (invoice.createdDate || new Date().toLocaleString('vi-VN').split(' ')[0]);
+            document.getElementById('p-room').innerText = invoice.roomName || '---';
+            document.getElementById('p-tenant').innerText = invoice.tenantName || '---';
+            document.getElementById('p-occupants').innerText = invoice.occupants || 1;
+            document.getElementById('p-price').innerText = Number(invoice.price || 0).toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-elec-qty').innerText = invoice.elecQty || 0;
+            document.getElementById('p-elec').innerText = Number(invoice.elecTotal || 0).toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-water').innerText = Number(invoice.waterTotal || 0).toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-water-desc').innerText = `(${invoice.waterQtyDesc || '--'})`;
+            document.getElementById('p-service').innerText = Number(invoice.service || 0).toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-debt').innerText = Number(invoice.debt || 0).toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-debt-row').style.display = Number(invoice.debt || 0) > 0 ? '' : 'none';
+            document.getElementById('p-total').innerText = Number(invoice.total || 0).toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-status').innerText = invoice.status || 'Chưa thanh toán';
+        }
+
         function renderInvoiceHistory() {
             const container = document.getElementById('invoice-history-cards');
             if (invoicesData.length === 0) {
@@ -1771,21 +2295,55 @@
             container.innerHTML = [...invoicesData].reverse().map(inv => `
                 <div class="p-3 border border-slate-200 rounded-xl bg-slate-50/50 space-y-1.5 text-xs">
                     <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-800">${inv.roomName} - ${inv.tenantName}</span>
+                        <span class="font-bold text-slate-800">${esc(inv.roomName)} - ${esc(inv.tenantName)}</span>
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded ${inv.status === 'Đã thanh toán' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}">${inv.status}</span>
-                            <button onclick="deleteSingleInvoice('${inv.id}', event)" class="text-rose-500 hover:text-rose-700 p-1">
+                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded ${inv.status === 'Đã thanh toán' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}">${esc(inv.status)}</span>
+                            <button onclick="printStoredInvoice('${inv.id}', event)" class="text-indigo-500 hover:text-indigo-700 p-1" title="In lại hóa đơn">
+                                <i class="fa-solid fa-print"></i>
+                            </button>
+                            <button onclick="deleteSingleInvoice('${inv.id}', event)" class="text-rose-500 hover:text-rose-700 p-1" title="Xóa hóa đơn">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
                     </div>
                     <div class="flex justify-between items-center text-slate-500">
-                        <span>Ngày tạo: ${inv.createdDate}</span>
+                        <span>Ngày tạo: ${esc(inv.createdDate)}</span>
                         <span class="text-indigo-600 font-bold">${Number(inv.total).toLocaleString('vi-VN')} đ</span>
                     </div>
                 </div>
             `).join('');
         }
+
+        window.printStoredInvoice = async function (invoiceId, evt) {
+            if (!adminUser) {
+                return Swal.fire({ title: 'Không có quyền', text: authRequiredMessage(), icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            const btn = evt?.currentTarget || evt?.target;
+            const invoice = invoicesData.find(inv => inv.id === invoiceId);
+            if (!invoice) {
+                return Swal.fire({ title: 'Không tìm thấy hóa đơn', text: 'Hóa đơn không còn tồn tại trong lịch sử.', icon: 'error', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+
+            await executeWithLock(btn, async () => {
+                const room = roomsData.find(item => item.name === invoice.roomName);
+                const details = room ? getRoomTotalDetails(room) : null;
+                preparePrintArea(details ? {
+                    ...invoice,
+                    occupants: invoice.occupants || room.occupants,
+                    details,
+                    price: invoice.price ?? details.price,
+                    elecQty: invoice.elecQty ?? details.elecQty,
+                    elecTotal: invoice.elecTotal ?? details.elecTotal,
+                    waterTotal: invoice.waterTotal ?? details.waterTotal,
+                    waterQtyDesc: invoice.waterQtyDesc || details.waterQtyDesc,
+                    service: invoice.service ?? details.service,
+                    debt: invoice.debt ?? details.debt,
+                    total: invoice.total ?? details.total,
+                    status: invoice.status || room.paymentStatus
+                } : invoice);
+                setTimeout(() => window.print(), 200);
+            });
+        };
 
         window.deleteSingleInvoice = async function (id, evt) {
             const btn = evt?.currentTarget || evt?.target;
@@ -1859,15 +2417,15 @@
                 <div class="p-3.5 border border-slate-200 rounded-xl bg-slate-50/50 space-y-2 text-xs">
                     <div class="flex justify-between items-start gap-3">
                         <div>
-                            <div class="font-bold text-slate-800">${req.roomName}</div>
-                            <div class="text-slate-500">${req.tenantName}${req.phone ? ' - ' + req.phone : ''}</div>
+                            <div class="font-bold text-slate-800">${esc(req.roomName)}</div>
+                            <div class="text-slate-500">${esc(req.tenantName)}${req.phone ? ' - ' + esc(req.phone) : ''}</div>
                         </div>
                         <span class="px-2 py-0.5 text-[10px] font-semibold rounded bg-amber-50 text-amber-700 border border-amber-100">Chờ xác nhận</span>
                     </div>
                     <div class="text-xs space-y-1 bg-white border border-slate-200 rounded-lg p-3">
                         <p><strong>Số tiền:</strong> ${Number(req.total).toLocaleString('vi-VN')} đ</p>
-                        <p><strong>Thanh toán:</strong> ${req.paymentMethod}</p>
-                        <p><strong>Gửi lúc:</strong> ${req.createdDate}</p>
+                        <p><strong>Thanh toán:</strong> ${esc(req.paymentMethod)}</p>
+                        <p><strong>Gửi lúc:</strong> ${esc(req.createdDate)}</p>
                     </div>
                     <div class="grid grid-cols-2 gap-2 pt-1">
                         <button onclick="approveInvoiceRequest('${req.id}', event)" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-xs font-semibold shadow-xs">
@@ -1942,7 +2500,8 @@
             await executeWithLock(btn, async () => {
                 showLoading();
                 request.status = 'rejected';
-                request.rejectionReason = result.value || '';
+                request.rejectionReason = boundedText(result.value || '');
+                assertRecordSize(request);
                 request.rejectedAt = Date.now();
                 request.rejectedDate = new Date().toLocaleString('vi-VN');
                 await set(ref(db, 'invoiceRequests/' + request.id), request);
@@ -1964,12 +2523,13 @@
                 <div class="p-3.5 border border-slate-200 rounded-xl bg-slate-50/50 space-y-2 text-xs">
                     <div class="flex justify-between items-start">
                         <div>
-                            <span class="font-bold text-slate-800">${item.roomName}</span>
-                            <span class="text-slate-500">(${item.tenantName})</span>
+                            <span class="font-bold text-slate-800">${esc(item.roomName)}</span>
+                            <span class="text-slate-500">(${esc(item.tenantName)})</span>
                         </div>
-                        <span class="text-[10px] text-slate-400">${item.date}</span>
+                        <span class="text-[10px] text-slate-400">${esc(item.date)}</span>
                     </div>
-                    <p class="text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200">${item.content}</p>
+                    <p class="text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200">${esc(item.content)}</p>
+                    ${imagePreviewHtml(item.image)}
                     <div class="flex justify-end gap-2 pt-1">
                         <button onclick="toggleIssueStatus('${item.id}', event)" class="px-3 py-1.5 rounded-lg text-xs font-semibold ${item.resolved ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-700 border border-amber-100'}">
                             ${item.resolved ? 'Đã xử lý' : 'Đánh dấu xong'}
@@ -2069,18 +2629,19 @@
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">${room.name}</h3>
-                            <p class="text-xs text-slate-500 mt-0.5">${room.status === 'Trống' ? 'Chưa có khách (0 người)' : `${room.tenant || 'Chưa có khách'} (${Math.max(1, parseNum(room.occupants))} người) ${room.phone ? ' - ' + room.phone : ''}`}</p>
+                            <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">${esc(room.name)}</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">${room.status === 'Trống' ? 'Chưa có khách (0 người)' : `${esc(room.tenant || 'Chưa có khách')} (${Math.max(1, parseNum(room.occupants))} người) ${room.phone ? ' - ' + esc(room.phone) : ''}`}</p>
                         </div>
-                        <span class="px-2.5 py-1 text-[11px] font-semibold rounded-md ${room.status === 'Đang thuê' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-600 border border-amber-100'}">${room.status}</span>
+                        <span class="px-2.5 py-1 text-[11px] font-semibold rounded-md ${room.status === 'Đang thuê' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-600 border border-amber-100'}">${esc(room.status)}</span>
                     </div>
 
                     ${alertBadge ? `<div class="flex flex-wrap gap-1">${alertBadge}</div>` : ''}
 
-                    ${room.note ? `<div class="bg-amber-50/60 p-2 rounded-lg text-xs text-amber-800 border border-amber-200 break-words"><i class="fa-solid fa-note-sticky mr-1"></i><strong>Ghi chú:</strong> ${room.note}</div>` : ''}
+                    ${room.note ? `<div class="bg-amber-50/60 p-2 rounded-lg text-xs text-amber-800 border border-amber-200 break-words"><i class="fa-solid fa-note-sticky mr-1"></i><strong>Ghi chú:</strong> ${esc(room.note)}</div>` : ''}
+                    ${details.debt > 0 ? `<div class="bg-rose-50 p-2 rounded-lg text-xs text-rose-700 border border-rose-200"><strong>Nợ kỳ trước:</strong> ${details.debt.toLocaleString('vi-VN')} đ</div>` : ''}
 
                     <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                        <span class="text-xs font-semibold text-slate-600">Tổng tiền:</span>
+                        <span class="text-xs font-semibold text-slate-600">Tổng phải trả:</span>
                         <span class="text-sm font-bold text-indigo-600">${details.total.toLocaleString('vi-VN')} đ</span>
                     </div>
                     
@@ -2099,15 +2660,18 @@
             document.getElementById('stat-total').innerText = roomsData.length;
             document.getElementById('stat-rented').innerText = rentedCount;
             document.getElementById('stat-empty').innerText = emptyCount;
-            document.getElementById('stat-expected-revenue').innerText = expectedRevenue.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('stat-revenue').innerText = totalRevenue.toLocaleString('vi-VN') + ' đ';
+            const currentRevenue = getCurrentRevenueSummary();
+            document.getElementById('stat-expected-revenue').innerText = currentRevenue.expected.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('stat-revenue').innerText = currentRevenue.paid.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('stat-debt').innerText = getOutstandingDebt().toLocaleString('vi-VN') + ' đ';
+            document.getElementById('stat-total-revenue').innerText = getRecordedRevenue().toLocaleString('vi-VN') + ' đ';
         };
 
         window.promptNextMonth = function (evt) {
             const btn = evt?.currentTarget || evt?.target;
             Swal.fire({
                 title: 'Chốt sổ & Chuyển tháng mới?',
-                text: 'Hệ thống sẽ lưu số liệu, tự động chuyển Chỉ số Mới thành Chỉ số Cũ vào CSDL, và đặt lại trạng thái chưa thanh toán.',
+                text: 'Hệ thống sẽ chuyển tiền chưa thanh toán thành khoản nợ, cộng vào kỳ mới, chuyển Chỉ số Mới thành Chỉ số Cũ và đặt lại trạng thái thanh toán.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#4f46e5',
@@ -2119,6 +2683,14 @@
                     await executeWithLock(btn, async () => {
                         showLoading();
                         for (let r of roomsData) {
+                            const closingMonth = currentMonthKey();
+                            const currentDetails = getRoomTotalDetails({ ...r, debt: 0 });
+                            if (r.status === 'Đang thuê' && r.paymentStatus !== 'Đã thanh toán') {
+                                r.debt = parseNum(r.debt) + currentDetails.currentTotal;
+                                r.debtHistory = Array.isArray(r.debtHistory) ? r.debtHistory : [];
+                                r.debtHistory.push({ month: closingMonth, amount: r.debt, recordedAt: Date.now() });
+                                r.debtHistory = r.debtHistory.slice(-120);
+                            }
                             r.elecOld = r.elecNew || r.elecOld;
                             r.waterOld = r.waterNew || r.waterOld;
                             r.paymentStatus = "Chưa thanh toán";
@@ -2151,6 +2723,174 @@
             document.getElementById('room-total-preview').innerText = details.total.toLocaleString('vi-VN') + ' đ';
         };
 
+        function recordsToObject(records, idField = 'id') {
+            const output = {};
+            (records || []).slice(0, MAX_COLLECTION_ITEMS).forEach((record, index) => {
+                const copy = { ...record };
+                const id = String(copy.docId || copy[idField] || `${idField}_${Date.now()}_${index}`).replace(/[.#$\/\[\]]/g, '_').slice(0, 120);
+                delete copy.docId;
+                delete copy[idField];
+                output[id] = copy;
+            });
+            return output;
+        }
+
+        function getBackupPayload() {
+            return {
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                rooms: recordsToObject(roomsData, 'docId'),
+                invoices: recordsToObject(invoicesData),
+                invoiceRequests: recordsToObject(paymentRequestsData),
+                issues: recordsToObject(issuesData),
+                chats: chatsData
+            };
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = filename;
+            anchor.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        window.exportBackup = async function (format) {
+            if (!adminUser) return Swal.fire({ title: 'Cần đăng nhập', text: authRequiredMessage(), icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            await loadAllData();
+            const payload = getBackupPayload();
+            const serialized = JSON.stringify(payload);
+            if (new Blob([serialized]).size > MAX_BACKUP_BYTES) {
+                return Swal.fire({ title: 'Dữ liệu quá lớn', text: 'Bản sao lưu vượt quá 5 MB. Hãy xóa bớt lịch sử hoặc tin nhắn trước khi xuất.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            if (format === 'xlsx') {
+                if (!window.XLSX) return Swal.fire({ title: 'Thiếu thư viện', text: 'SheetJS chưa tải được nên không thể xuất Excel.', icon: 'error', customClass: { popup: 'rounded-xl text-xs' } });
+                const workbook = XLSX.utils.book_new();
+                const history = getDebtHistoryRows();
+                XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['docId', 'name', 'status', 'tenant', 'phone', 'paymentStatus', 'price', 'debt', 'deposit', 'contractNumber', 'startDate', 'endDate', 'debtHistory'], ...roomsData.map(room => [room.docId, room.name, room.status, room.tenant, room.phone, room.paymentStatus, room.price, room.debt, room.deposit, room.contractNumber, room.startDate, room.endDate, JSON.stringify(room.debtHistory || [])])]), 'Rooms');
+                XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(invoicesData), 'Invoices');
+                XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(paymentRequestsData), 'Requests');
+                XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(issuesData), 'Issues');
+                XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(history), 'DebtHistory');
+                XLSX.writeFile(workbook, `nha-tro-backup-${Date.now()}.xlsx`);
+            } else {
+                downloadBlob(new Blob([serialized], { type: 'application/json' }), `nha-tro-backup-${Date.now()}.json`);
+            }
+            Toast.fire({ icon: 'success', title: 'Đã xuất bản sao lưu.' });
+        };
+
+        function asCollection(value) {
+            if (Array.isArray(value)) return recordsToObject(value);
+            if (!value || typeof value !== 'object') return {};
+            return Object.fromEntries(Object.entries(value).slice(0, MAX_COLLECTION_ITEMS).filter(([, item]) => item && typeof item === 'object'));
+        }
+
+        function sanitizeImportedRoom(raw, id) {
+            const room = { ...raw };
+            room.name = boundedText(room.name, 100);
+            room.status = room.status === 'Đang thuê' ? 'Đang thuê' : 'Trống';
+            room.tenant = boundedText(room.tenant, 150);
+            room.phone = boundedText(room.phone, 30);
+            room.note = boundedText(room.note);
+            room.contractNumber = boundedText(room.contractNumber, 100);
+            room.deposit = Math.max(0, parseNum(room.deposit));
+            room.debt = Math.max(0, parseNum(room.debt));
+            room.debtHistory = Array.isArray(room.debtHistory) ? room.debtHistory.slice(-120) : [];
+            room.docId = String(id).replace(/[.#$\/\[\]]/g, '_').slice(0, 120);
+            assertRecordSize(room);
+            return room;
+        }
+
+        function parseBackupWorkbook(data) {
+            const workbook = XLSX.read(data, { type: 'array' });
+            const read = name => workbook.Sheets[name] ? XLSX.utils.sheet_to_json(workbook.Sheets[name], { defval: '' }) : [];
+            const rooms = {};
+            read('Rooms').forEach((row, index) => {
+                if (row.debtHistory && typeof row.debtHistory === 'string') {
+                    try { row.debtHistory = JSON.parse(row.debtHistory); } catch { row.debtHistory = []; }
+                }
+                const id = row.docId || `room_import_${index}`;
+                rooms[id] = sanitizeImportedRoom(row, id);
+                delete rooms[id].docId;
+            });
+            return { rooms, invoices: asCollection(read('Invoices')), invoiceRequests: asCollection(read('Requests')), issues: asCollection(read('Issues')) };
+        }
+
+        function sanitizeImportedChats(value) {
+            if (!value || typeof value !== 'object') return {};
+            const output = {};
+            Object.entries(value).slice(0, MAX_ROOMS).forEach(([roomId, messages]) => {
+                if (!messages || typeof messages !== 'object') return;
+                output[String(roomId).replace(/[.#$\/\[\]]/g, '_').slice(0, 120)] = {};
+                Object.entries(messages).slice(0, MAX_COLLECTION_ITEMS).forEach(([messageId, message]) => {
+                    if (!message || typeof message !== 'object') return;
+                    const clean = {
+                        sender: message.sender === 'admin' ? 'admin' : 'tenant',
+                        senderName: boundedText(message.senderName, 100),
+                        text: boundedText(message.text),
+                        image: /^data:image\/[a-z0-9.+-]+;base64,/i.test(String(message.image || '')) ? message.image : '',
+                        timestamp: Number(message.timestamp) || Date.now()
+                    };
+                    assertRecordSize(clean);
+                    output[String(roomId).replace(/[.#$\/\[\]]/g, '_').slice(0, 120)][String(messageId).replace(/[.#$\/\[\]]/g, '_').slice(0, 120)] = clean;
+                });
+            });
+            return output;
+        }
+
+        window.importBackupFile = async function (file) {
+            if (!file) return;
+            if (!adminUser) {
+                document.getElementById('backup-file-input').value = '';
+                return Swal.fire({ title: 'Cần đăng nhập', text: authRequiredMessage(), icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            if (file.size > MAX_BACKUP_BYTES) {
+                document.getElementById('backup-file-input').value = '';
+                return Swal.fire({ title: 'Tệp quá lớn', text: 'Chỉ chấp nhận tệp sao lưu tối đa 5 MB.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            try {
+                const data = await file.arrayBuffer();
+                const isJson = file.name.toLowerCase().endsWith('.json');
+                const payload = isJson ? JSON.parse(new TextDecoder().decode(data)) : parseBackupWorkbook(data);
+                const rooms = asCollection(payload.rooms);
+                if (Object.keys(rooms).length > MAX_ROOMS) throw new Error(`Bản sao lưu có hơn ${MAX_ROOMS} phòng.`);
+                const cleanRooms = {};
+                Object.entries(rooms).forEach(([id, room]) => {
+                    const clean = sanitizeImportedRoom(room, id);
+                    const cleanId = clean.docId;
+                    delete clean.docId;
+                    cleanRooms[cleanId] = clean;
+                });
+                const cleanPayload = {
+                    rooms: cleanRooms,
+                    invoices: asCollection(payload.invoices),
+                    invoiceRequests: asCollection(payload.invoiceRequests),
+                    issues: asCollection(payload.issues),
+                    chats: sanitizeImportedChats(payload.chats)
+                };
+                if (new Blob([JSON.stringify(cleanPayload)]).size > MAX_BACKUP_BYTES) throw new Error('Dữ liệu sau khi kiểm tra vẫn vượt quá 5 MB.');
+                const result = await Swal.fire({
+                    title: 'Khôi phục bản sao lưu?',
+                    text: 'Các nhóm dữ liệu có trong tệp sẽ được ghi đè lên CSDL hiện tại.',
+                    icon: 'warning', showCancelButton: true, confirmButtonText: 'Khôi phục', cancelButtonText: 'Hủy', confirmButtonColor: '#e11d48',
+                    customClass: { popup: 'rounded-xl text-xs' }
+                });
+                if (!result.isConfirmed) return;
+                showLoading();
+                for (const [collection, records] of Object.entries(cleanPayload)) await set(ref(db, collection), records);
+                await loadAllData();
+                renderFilteredRooms();
+                hideLoading();
+                Toast.fire({ icon: 'success', title: 'Đã khôi phục bản sao lưu.' });
+            } catch (error) {
+                hideLoading();
+                notifyError(error, 'Nhập sao lưu thất bại');
+            } finally {
+                document.getElementById('backup-file-input').value = '';
+            }
+        };
+
         window.openAddRoomModal = function () {
             if (roomsData.length >= MAX_ROOMS) {
                 return Swal.fire({ title: 'Thông báo', text: 'Hệ thống đã đạt giới hạn tối đa 12 phòng!', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
@@ -2163,6 +2903,10 @@
             document.getElementById('room-occupants').value = '0';
             document.getElementById('room-phone').value = '';
             document.getElementById('room-is-paid').value = 'Chưa thanh toán';
+            document.getElementById('room-contract-number').value = '';
+            document.getElementById('room-deposit').value = '0';
+            document.getElementById('room-start-date').value = '';
+            document.getElementById('room-end-date').value = '';
             document.getElementById('room-price').value = '2,000,000';
             document.getElementById('elec-price').value = '4,000';
             document.getElementById('elec-old').value = '0';
@@ -2191,6 +2935,10 @@
             document.getElementById('room-occupants').value = room.occupants || 0;
             document.getElementById('room-phone').value = room.phone || '';
             document.getElementById('room-is-paid').value = room.paymentStatus || 'Chưa thanh toán';
+            document.getElementById('room-contract-number').value = room.contractNumber || '';
+            document.getElementById('room-deposit').value = parseNum(room.deposit).toLocaleString('en-US');
+            document.getElementById('room-start-date').value = room.startDate || '';
+            document.getElementById('room-end-date').value = room.endDate || '';
             document.getElementById('room-price').value = parseNum(room.price).toLocaleString('en-US');
             document.getElementById('elec-price').value = parseNum(room.elecPrice || 4000).toLocaleString('en-US');
             document.getElementById('elec-old').value = parseNum(room.elecOld).toLocaleString('en-US');
@@ -2231,9 +2979,9 @@
             e.preventDefault();
             const btn = e.submitter;
 
-            const name = document.getElementById('room-name').value.trim();
+            const name = boundedText(document.getElementById('room-name').value, 100);
             const status = document.getElementById('room-status').value;
-            const tenant = document.getElementById('room-tenant').value.trim();
+            const tenant = boundedText(document.getElementById('room-tenant').value, 150);
             const occupants = parseNum(document.getElementById('room-occupants').value);
             const price = parseNum(document.getElementById('room-price').value);
             const elecPrice = parseNum(document.getElementById('elec-price').value);
@@ -2244,6 +2992,10 @@
             const waterPriceQuota = parseNum(document.getElementById('water-price-quota').value);
             const waterPriceNormal = parseNum(document.getElementById('water-price-normal').value);
             const service = parseNum(document.getElementById('room-service').value);
+            const contractNumber = boundedText(document.getElementById('room-contract-number').value, 100);
+            const deposit = parseNum(document.getElementById('room-deposit').value);
+            const startDate = document.getElementById('room-start-date').value;
+            const endDate = document.getElementById('room-end-date').value;
 
             if (!name) return Swal.fire({ title: 'Thiếu thông tin', text: 'Vui lòng nhập tên phòng.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             if (status === 'Đang thuê') {
@@ -2253,7 +3005,7 @@
             if (roomsData.some(room => room.docId !== currentEditingDocId && room.name.toLowerCase() === name.toLowerCase())) {
                 return Swal.fire({ title: 'Trùng tên phòng', text: 'Tên phòng đã tồn tại. Vui lòng chọn tên khác.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             }
-            if ([price, elecPrice, elecOld, elecNew, waterOld, waterNew, waterPriceQuota, waterPriceNormal, service].some(value => value < 0)) {
+            if ([price, elecPrice, elecOld, elecNew, waterOld, waterNew, waterPriceQuota, waterPriceNormal, service, deposit].some(value => value < 0)) {
                 return Swal.fire({ title: 'Dữ liệu không hợp lệ', text: 'Các chỉ số và đơn giá không được là số âm.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             }
             if (elecNew < elecOld) {
@@ -2262,14 +3014,18 @@
             if (waterNew < waterOld) {
                 return Swal.fire({ title: 'Chỉ số nước không hợp lệ', text: 'Số mới phải lớn hơn hoặc bằng số cũ.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             }
+            if (startDate && endDate && endDate < startDate) {
+                return Swal.fire({ title: 'Ngày hợp đồng không hợp lệ', text: 'Ngày kết thúc phải sau ngày bắt đầu.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
 
             const roomData = {
                 name: name,
                 status: status,
                 tenant: status === 'Đang thuê' ? tenant : '',
                 occupants: status === 'Đang thuê' ? occupants : 0,
-                phone: status === 'Đang thuê' ? document.getElementById('room-phone').value.trim() : '',
+                phone: status === 'Đang thuê' ? boundedText(document.getElementById('room-phone').value, 30) : '',
                 paymentStatus: document.getElementById('room-is-paid').value,
+                debt: status === 'Đang thuê' ? Math.max(0, parseNum(roomsData.find(room => room.docId === currentEditingDocId)?.debt)) : 0,
                 price,
                 elecPrice,
                 elecOld,
@@ -2280,8 +3036,15 @@
                 waterPriceQuota,
                 waterPriceNormal,
                 service,
-                note: document.getElementById('room-note').value.trim()
+                note: boundedText(document.getElementById('room-note').value),
+                contractNumber,
+                deposit,
+                startDate,
+                endDate,
+                debtHistory: Array.isArray(roomsData.find(room => room.docId === currentEditingDocId)?.debtHistory)
+                    ? roomsData.find(room => room.docId === currentEditingDocId).debtHistory.slice(-120) : []
             };
+            assertRecordSize(roomData);
 
             await executeWithLock(btn, async () => {
                 showLoading();
@@ -2330,7 +3093,9 @@
 
             await executeWithLock(btn, async () => {
                 showLoading();
-                room.paymentStatus = room.paymentStatus === "Đã thanh toán" ? "Chưa thanh toán" : "Đã thanh toán";
+                const isPaid = room.paymentStatus === "Đã thanh toán";
+                room.paymentStatus = isPaid ? "Chưa thanh toán" : "Đã thanh toán";
+                if (!isPaid) room.debt = 0;
                 await set(ref(db, 'rooms/' + room.docId), room);
                 await loadAllData();
                 renderFilteredRooms();
@@ -2346,6 +3111,8 @@
         window.openTenantIssueModal = function () {
             if (!activeTenantRoom) return;
             document.getElementById('issue-text').value = '';
+            document.getElementById('issue-image').value = '';
+            document.getElementById('issue-image-name').innerText = '';
             document.getElementById('issueModal').classList.remove('hidden');
         };
 
@@ -2355,11 +3122,13 @@
 
         window.submitIssue = async function (evt) {
             const btn = evt?.currentTarget || evt?.target;
-            const content = document.getElementById('issue-text').value.trim();
+            const content = boundedText(document.getElementById('issue-text').value);
+            const imageInput = document.getElementById('issue-image');
             if (!content || !activeTenantRoom) return Swal.fire({ title: 'Thiếu thông tin', text: 'Vui lòng mô tả chi tiết sự cố.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
 
             await executeWithLock(btn, async () => {
                 showLoading();
+                const image = await readImageAsDataUrl(imageInput.files[0]);
                 const issueId = 'issue_' + Date.now();
                 const issueData = {
                     id: issueId,
@@ -2367,11 +3136,14 @@
                     roomName: activeTenantRoom.name,
                     tenantName: activeTenantRoom.tenant || 'Khách',
                     content: content,
+                    image,
                     date: new Date().toLocaleString('vi-VN'),
                     resolved: false
                 };
+                assertRecordSize(issueData);
                 await set(ref(db, 'issues/' + issueId), issueData);
                 await loadAllData();
+                imageInput.value = '';
                 closeIssueModal();
                 hideLoading();
                 Toast.fire({ icon: 'success', title: 'Đã gửi báo cố thành công!' });
