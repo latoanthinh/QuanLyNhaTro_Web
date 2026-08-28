@@ -44,209 +44,237 @@
                 visibility: hidden !important;
             }
 
-            #printArea,
-            #printArea * {
-                visibility: visible !important;
+            @page {
+                size: 80mm auto;
+                margin: 0;
             }
 
-            #printArea {
-                display: block !important;
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 80mm !important;
-                max-width: 80mm !important;
-                min-height: 0 !important;
-                height: auto !important;
-                box-sizing: border-box !important;
-                margin: 0 !important;
-                padding: 4mm !important;
-                background: #fff !important;
-                overflow: visible !important;
-                page-break-after: avoid !important;
-                break-after: avoid-page !important;
+            @media print {
+
+                html,
+                body {
+                    width: 80mm !important;
+                    min-width: 80mm !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: #fff !important;
+                    color: #000 !important;
+                }
+
+                body * {
+                    visibility: hidden !important;
+                }
+
+                #printArea,
+                #printArea * {
+                    visibility: visible !important;
+                }
+
+                #printArea {
+                    display: block !important;
+                    position: absolute !important;
+                    left: 0 !important;
+                    top: 0 !important;
+                    width: 80mm !important;
+                    max-width: 80mm !important;
+                    box-sizing: border-box !important;
+                    margin: 0 !important;
+                    padding: 3mm 4mm !important;
+                    background: #fff !important;
+                    font-weight: bold !important;
+                    font-family: 'Courier New', Courier, monospace !important;
+                    font-size: 12px !important;
+                    color: #000 !important;
+                    -webkit-text-stroke: 0.3px #000 !important;
+                }
+
+                #printArea h2 {
+                    font-size: 18px !important;
+                    font-weight: bold !important;
+                    margin: 0 0 4px !important;
+                    text-align: center !important;
+                }
+
+                #printArea p,
+                #printArea span {
+                    color: #000 !important;
+                }
             }
 
-            #printArea>div,
-            #printArea p,
-            #printArea hr {
-                break-inside: avoid !important;
-                page-break-inside: avoid !important;
+            @property --angle {
+                syntax: '<angle>';
+                initial-value: 0deg;
+                inherits: false;
             }
 
-            #printArea h2 {
-                font-size: 16px !important;
-                margin: 0 0 4px !important;
+            @keyframes rotate-border {
+                to {
+                    --angle: 360deg;
+                }
             }
 
-            #printArea p {
-                margin: 3px 0 !important;
+            .animated-border-box {
+                position: relative;
+                border-radius: 0.5rem;
+                background: #ffffff;
+                transition: all 0.3s ease;
             }
-        }
 
-        @property --angle {
-            syntax: '<angle>';
-            initial-value: 0deg;
-            inherits: false;
-        }
-
-        @keyframes rotate-border {
-            to {
-                --angle: 360deg;
+            .animated-border-box:focus-within {
+                background-image: linear-gradient(#fff, #fff),
+                    conic-gradient(from var(--angle), #475569, #0ea5e9, #6366f1, #475569);
+                background-origin: border-box;
+                background-clip: padding-box, border-box;
+                border: 2px solid transparent !important;
+                animation: rotate-border 3s linear infinite;
+                box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
             }
-        }
 
-        .animated-border-box {
-            position: relative;
-            border-radius: 0.5rem;
-            background: #ffffff;
-            transition: all 0.3s ease;
-        }
+            .animated-border-box input,
+            .animated-border-box select,
+            .animated-border-box textarea {
+                outline: none !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
 
-        .animated-border-box:focus-within {
-            background-image: linear-gradient(#fff, #fff),
-                conic-gradient(from var(--angle), #475569, #0ea5e9, #6366f1, #475569);
-            background-origin: border-box;
-            background-clip: padding-box, border-box;
-            border: 2px solid transparent !important;
-            animation: rotate-border 3s linear infinite;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
-        }
+            .loading-orb {
+                width: 58px;
+                height: 58px;
+                border-radius: 9999px;
+                background: conic-gradient(from 0deg, #4f46e5, #06b6d4, #818cf8, #4f46e5);
+                animation: loading-spin 1.4s linear infinite;
+                position: relative;
+                box-shadow: 0 0 30px rgba(79, 70, 229, 0.28);
+            }
 
-        .animated-border-box input,
-        .animated-border-box select,
-        .animated-border-box textarea {
-            outline: none !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
+            .loading-orb::after {
+                content: '';
+                position: absolute;
+                inset: 5px;
+                border-radius: inherit;
+                background: #fff;
+            }
 
-        .loading-orb {
-            width: 58px;
-            height: 58px;
-            border-radius: 9999px;
-            background: conic-gradient(from 0deg, #4f46e5, #06b6d4, #818cf8, #4f46e5);
-            animation: loading-spin 1.4s linear infinite;
-            position: relative;
-            box-shadow: 0 0 30px rgba(79, 70, 229, 0.28);
-        }
+            .loading-orb::before {
+                content: '';
+                position: absolute;
+                inset: 20px;
+                border-radius: inherit;
+                background: #4f46e5;
+                z-index: 1;
+                animation: loading-pulse 1.4s ease-in-out infinite;
+            }
 
-        .loading-orb::after {
-            content: '';
-            position: absolute;
-            inset: 5px;
-            border-radius: inherit;
-            background: #fff;
-        }
+            @keyframes loading-spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
 
-        .loading-orb::before {
-            content: '';
-            position: absolute;
-            inset: 20px;
-            border-radius: inherit;
-            background: #4f46e5;
-            z-index: 1;
-            animation: loading-pulse 1.4s ease-in-out infinite;
-        }
+            @keyframes loading-pulse {
 
-        @keyframes loading-spin {
-            to { transform: rotate(360deg); }
-        }
+                0%,
+                100% {
+                    transform: scale(0.75);
+                    opacity: 0.65;
+                }
 
-        @keyframes loading-pulse {
-            0%, 100% { transform: scale(0.75); opacity: 0.65; }
-            50% { transform: scale(1); opacity: 1; }
-        }
-
-        .admin-nav-panel {
-            width: 220px;
-            min-width: 220px;
-            max-height: none;
-            min-height: 420px;
-            opacity: 1;
-            transform: translateY(0);
-            overflow: hidden;
-            transition: width 0.3s ease, min-width 0.3s ease, opacity 0.2s ease, transform 0.3s ease;
-        }
-
-        .admin-nav-panel.is-collapsed {
-            width: 0;
-            min-width: 0;
-            max-height: none;
-            opacity: 0;
-            transform: translateX(-18px);
-            pointer-events: none;
-        }
-
-        .admin-nav-toggle {
-            transition: transform 0.3s ease, background-color 0.2s ease;
-        }
-
-        .admin-nav-toggle.is-collapsed {
-            transform: none;
-        }
-
-        .admin-layout {
-            min-width: 0;
-            overflow: visible;
-        }
-
-        .admin-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
-            gap: 0.75rem;
-            min-width: 0;
-        }
-
-        .admin-stat-card {
-            min-width: 0;
-            overflow: hidden;
-        }
-
-        .admin-stat-card > div {
-            min-width: 0;
-        }
-
-        .admin-stat-card h3,
-        .admin-stat-card p {
-            overflow-wrap: anywhere;
-        }
-
-        @media (max-width: 640px) {
-            .admin-layout {
-                flex-direction: column;
-                gap: 0.75rem;
+                50% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
             }
 
             .admin-nav-panel {
-                width: 100%;
-                min-width: 0;
-                min-height: auto;
-                max-height: 30rem;
-                transition: max-height 0.3s ease, opacity 0.2s ease, transform 0.3s ease;
+                width: 220px;
+                min-width: 220px;
+                max-height: none;
+                min-height: 420px;
+                opacity: 1;
+                transform: translateY(0);
+                overflow: hidden;
+                transition: width 0.3s ease, min-width 0.3s ease, opacity 0.2s ease, transform 0.3s ease;
             }
 
             .admin-nav-panel.is-collapsed {
                 width: 0;
-                min-height: 0;
-                max-height: 0;
-                padding-top: 0;
-                padding-bottom: 0;
+                min-width: 0;
+                max-height: none;
+                opacity: 0;
+                transform: translateX(-18px);
+                pointer-events: none;
             }
 
             .admin-nav-toggle {
-                position: relative;
-                top: auto;
-                left: auto;
-                transform: none;
-                align-self: flex-start;
-                margin: 0 0 -0.25rem 0.25rem;
+                transition: transform 0.3s ease, background-color 0.2s ease;
             }
 
             .admin-nav-toggle.is-collapsed {
                 transform: none;
             }
-        }
+
+            .admin-layout {
+                min-width: 0;
+                overflow: visible;
+            }
+
+            .admin-stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
+                gap: 0.75rem;
+                min-width: 0;
+            }
+
+            .admin-stat-card {
+                min-width: 0;
+                overflow: hidden;
+            }
+
+            .admin-stat-card>div {
+                min-width: 0;
+            }
+
+            .admin-stat-card h3,
+            .admin-stat-card p {
+                overflow-wrap: anywhere;
+            }
+
+            @media (max-width: 640px) {
+                .admin-layout {
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+
+                .admin-nav-panel {
+                    width: 100%;
+                    min-width: 0;
+                    min-height: auto;
+                    max-height: 30rem;
+                    transition: max-height 0.3s ease, opacity 0.2s ease, transform 0.3s ease;
+                }
+
+                .admin-nav-panel.is-collapsed {
+                    width: 0;
+                    min-height: 0;
+                    max-height: 0;
+                    padding-top: 0;
+                    padding-bottom: 0;
+                }
+
+                .admin-nav-toggle {
+                    position: relative;
+                    top: auto;
+                    left: auto;
+                    transform: none;
+                    align-self: flex-start;
+                    margin: 0 0 -0.25rem 0.25rem;
+                }
+
+                .admin-nav-toggle.is-collapsed {
+                    transform: none;
+                }
+            }
     </style>
 </head>
 
@@ -255,10 +283,12 @@
     <!-- Loading Overlay -->
     <div id="global-loading"
         class="fixed inset-0 bg-slate-900/40 z-[9999] hidden flex flex-col items-center justify-center backdrop-blur-xs">
-        <div class="bg-white/95 p-7 rounded-2xl shadow-2xl flex flex-col items-center max-w-xs w-full mx-4 border border-white/80">
+        <div
+            class="bg-white/95 p-7 rounded-2xl shadow-2xl flex flex-col items-center max-w-xs w-full mx-4 border border-white/80">
             <div class="loading-orb" aria-hidden="true"></div>
             <p class="text-sm font-bold text-slate-800 mt-4">Đang xử lý</p>
-            <p id="loading-text" class="text-xs font-medium text-slate-500 mt-1 text-center">Vui lòng chờ trong giây lát...</p>
+            <p id="loading-text" class="text-xs font-medium text-slate-500 mt-1 text-center">Vui lòng chờ trong giây
+                lát...</p>
             <div class="w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-4">
                 <div class="h-full w-1/2 bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full animate-pulse"></div>
             </div>
@@ -385,37 +415,37 @@
             <div class="admin-layout flex items-start gap-3 relative">
                 <div id="admin-nav-panel"
                     class="admin-nav-panel bg-white rounded-xl shadow-xs p-2 flex flex-col gap-1.5 border border-slate-200">
-                <button onclick="switchAdminTab('tab-overview')" id="nav-tab-overview"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-indigo-600 text-white flex items-center gap-2 shrink-0 transition-all text-left">
-                    <i class="fa-solid fa-chart-pie"></i> Tổng Quan
-                </button>
-                <button onclick="switchAdminTab('tab-rooms')" id="nav-tab-rooms"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 transition-all text-left">
-                    <i class="fa-solid fa-door-open"></i> Quản Lý Phòng
-                </button>
-                <button onclick="switchAdminTab('tab-invoices')" id="nav-tab-invoices"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 transition-all text-left">
-                    <i class="fa-solid fa-receipt"></i> Lịch Sử HĐ
-                </button>
-                <button onclick="switchAdminTab('tab-payment-requests')" id="nav-tab-payment-requests"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> Yêu Cầu HĐ <span id="badge-payment-requests"
-                        class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-                </button>
-                <button onclick="switchAdminTab('tab-issues')" id="nav-tab-issues"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
-                    <i class="fa-solid fa-screwdriver-wrench"></i> Sự Cố <span id="badge-issues"
-                        class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-                </button>
-                <button onclick="switchAdminTab('tab-chats')" id="nav-tab-chats"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
-                    <i class="fa-solid fa-comments"></i> Nhắn Tin <span id="badge-chats"
-                        class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-                </button>
-                <button onclick="logoutAdmin()"
-                    class="py-2.5 px-3 text-xs font-semibold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center gap-2 shrink-0 mt-auto transition-all text-left">
-                    <i class="fa-solid fa-lock"></i> Khóa
-                </button>
+                    <button onclick="switchAdminTab('tab-overview')" id="nav-tab-overview"
+                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-indigo-600 text-white flex items-center gap-2 shrink-0 transition-all text-left">
+                        <i class="fa-solid fa-chart-pie"></i> Tổng Quan
+                    </button>
+                    <button onclick="switchAdminTab('tab-rooms')" id="nav-tab-rooms"
+                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 transition-all text-left">
+                        <i class="fa-solid fa-door-open"></i> Quản Lý Phòng
+                    </button>
+                    <button onclick="switchAdminTab('tab-invoices')" id="nav-tab-invoices"
+                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 transition-all text-left">
+                        <i class="fa-solid fa-receipt"></i> Lịch Sử HĐ
+                    </button>
+                    <button onclick="switchAdminTab('tab-payment-requests')" id="nav-tab-payment-requests"
+                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Yêu Cầu HĐ <span id="badge-payment-requests"
+                            class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </button>
+                    <button onclick="switchAdminTab('tab-issues')" id="nav-tab-issues"
+                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
+                        <i class="fa-solid fa-screwdriver-wrench"></i> Sự Cố <span id="badge-issues"
+                            class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </button>
+                    <button onclick="switchAdminTab('tab-chats')" id="nav-tab-chats"
+                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
+                        <i class="fa-solid fa-comments"></i> Nhắn Tin <span id="badge-chats"
+                            class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </button>
+                    <button onclick="logoutAdmin()"
+                        class="py-2.5 px-3 text-xs font-semibold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center gap-2 shrink-0 mt-auto transition-all text-left">
+                        <i class="fa-solid fa-lock"></i> Khóa
+                    </button>
                 </div>
                 <button onclick="toggleAdminNav()" id="admin-nav-toggle"
                     class="admin-nav-toggle absolute left-0 top-4 -translate-x-1/2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center shadow-xs z-10"
@@ -425,265 +455,275 @@
                 <div class="flex-1 min-w-0 space-y-5">
                     <span class="text-xs font-semibold text-slate-500">Bảng điều khiển Chủ Trọ</span>
 
-            <!-- TAB 1: TỔNG QUAN -->
-            <div id="tab-overview" class="admin-tab-content space-y-4">
-                <section class="admin-stats-grid">
-                    <div
-                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-blue-500 flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-[11px] font-semibold">Tổng phòng</p>
-                            <h3 id="stat-total" class="text-lg font-bold text-slate-800">0</h3>
-                        </div>
-                        <i class="fa-solid fa-door-open text-xl text-blue-500/80"></i>
-                    </div>
-                    <div
-                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-emerald-500 flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-[11px] font-semibold">Đang thuê</p>
-                            <h3 id="stat-rented" class="text-lg font-bold text-emerald-600">0</h3>
-                        </div>
-                        <i class="fa-solid fa-users text-xl text-emerald-500/80"></i>
-                    </div>
-                    <div
-                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-amber-500 flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-[11px] font-semibold">Phòng trống</p>
-                            <h3 id="stat-empty" class="text-lg font-bold text-amber-600">0</h3>
-                        </div>
-                        <i class="fa-solid fa-bed text-xl text-amber-500/80"></i>
-                    </div>
-                    <div
-                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-indigo-500 flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-[11px] font-semibold">Dự kiến tháng này</p>
-                            <h3 id="stat-expected-revenue" class="text-xs sm:text-sm font-bold text-indigo-600">0 đ</h3>
-                        </div>
-                        <i class="fa-solid fa-calculator text-xl text-indigo-500/80"></i>
-                    </div>
-                    <div
-                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-purple-500 flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-[11px] font-semibold">Thực tế đã thu</p>
-                            <h3 id="stat-revenue" class="text-xs sm:text-sm font-bold text-purple-600">0 đ</h3>
-                        </div>
-                        <i class="fa-solid fa-money-bill-wave text-xl text-purple-500/80"></i>
-                    </div>
-                    <div
-                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-rose-500 flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-[11px] font-semibold">Tổng nợ hiện tại</p>
-                            <h3 id="stat-debt" class="text-xs sm:text-sm font-bold text-rose-600">0 đ</h3>
-                        </div>
-                        <i class="fa-solid fa-file-invoice-dollar text-xl text-rose-500/80"></i>
-                    </div>
-                    <div
-                        class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-fuchsia-500 flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-[11px] font-semibold">Tổng doanh thu đã ghi nhận</p>
-                            <h3 id="stat-total-revenue" class="text-xs sm:text-sm font-bold text-fuchsia-600">0 đ</h3>
-                        </div>
-                        <i class="fa-solid fa-chart-line text-xl text-fuchsia-500/80"></i>
-                    </div>
-                </section>
+                    <!-- TAB 1: TỔNG QUAN -->
+                    <div id="tab-overview" class="admin-tab-content space-y-4">
+                        <section class="admin-stats-grid">
+                            <div
+                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-blue-500 flex items-center justify-between">
+                                <div>
+                                    <p class="text-slate-500 text-[11px] font-semibold">Tổng phòng</p>
+                                    <h3 id="stat-total" class="text-lg font-bold text-slate-800">0</h3>
+                                </div>
+                                <i class="fa-solid fa-door-open text-xl text-blue-500/80"></i>
+                            </div>
+                            <div
+                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-emerald-500 flex items-center justify-between">
+                                <div>
+                                    <p class="text-slate-500 text-[11px] font-semibold">Đang thuê</p>
+                                    <h3 id="stat-rented" class="text-lg font-bold text-emerald-600">0</h3>
+                                </div>
+                                <i class="fa-solid fa-users text-xl text-emerald-500/80"></i>
+                            </div>
+                            <div
+                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-amber-500 flex items-center justify-between">
+                                <div>
+                                    <p class="text-slate-500 text-[11px] font-semibold">Phòng trống</p>
+                                    <h3 id="stat-empty" class="text-lg font-bold text-amber-600">0</h3>
+                                </div>
+                                <i class="fa-solid fa-bed text-xl text-amber-500/80"></i>
+                            </div>
+                            <div
+                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-indigo-500 flex items-center justify-between">
+                                <div>
+                                    <p class="text-slate-500 text-[11px] font-semibold">Dự kiến tháng này</p>
+                                    <h3 id="stat-expected-revenue" class="text-xs sm:text-sm font-bold text-indigo-600">
+                                        0 đ</h3>
+                                </div>
+                                <i class="fa-solid fa-calculator text-xl text-indigo-500/80"></i>
+                            </div>
+                            <div
+                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-purple-500 flex items-center justify-between">
+                                <div>
+                                    <p class="text-slate-500 text-[11px] font-semibold">Thực tế đã thu</p>
+                                    <h3 id="stat-revenue" class="text-xs sm:text-sm font-bold text-purple-600">0 đ</h3>
+                                </div>
+                                <i class="fa-solid fa-money-bill-wave text-xl text-purple-500/80"></i>
+                            </div>
+                            <div
+                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-rose-500 flex items-center justify-between">
+                                <div>
+                                    <p class="text-slate-500 text-[11px] font-semibold">Tổng nợ hiện tại</p>
+                                    <h3 id="stat-debt" class="text-xs sm:text-sm font-bold text-rose-600">0 đ</h3>
+                                </div>
+                                <i class="fa-solid fa-file-invoice-dollar text-xl text-rose-500/80"></i>
+                            </div>
+                            <div
+                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-fuchsia-500 flex items-center justify-between">
+                                <div>
+                                    <p class="text-slate-500 text-[11px] font-semibold">Tổng doanh thu đã ghi nhận</p>
+                                    <h3 id="stat-total-revenue" class="text-xs sm:text-sm font-bold text-fuchsia-600">0
+                                        đ</h3>
+                                </div>
+                                <i class="fa-solid fa-chart-line text-xl text-fuchsia-500/80"></i>
+                            </div>
+                        </section>
 
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
-                    <h2 class="text-sm sm:text-base font-bold text-slate-800">
-                    <i class="fa-solid fa-chart-column mr-2 text-indigo-600"></i> Dự Kiến Và Thực Tế Theo Tháng
-                    </h2>
-                    <div class="relative h-60 sm:h-72 w-full">
-                        <canvas id="revenueChart"></canvas>
-                    </div>
-                </section>
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
-                    <h2 class="text-sm sm:text-base font-bold text-slate-800">
-                        <i class="fa-solid fa-clock-rotate-left mr-2 text-rose-600"></i> Lịch Sử Công Nợ Theo Tháng
-                    </h2>
-                    <div id="debt-history-report" class="overflow-x-auto"></div>
-                </section>
-
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
-                    <h2 class="text-sm sm:text-base font-bold text-slate-800">
-                        <i class="fa-solid fa-code-compare mr-2 text-indigo-600"></i> So Sánh Doanh Thu Theo Tháng
-                    </h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Tháng 1 (Gốc):</label>
-                            <select id="compare-month-1" onchange="renderRevenueComparison()"
-                                class="w-full border border-slate-200 rounded-lg p-2 text-xs font-semibold bg-slate-50"></select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Tháng 2 (So sánh):</label>
-                            <select id="compare-month-2" onchange="renderRevenueComparison()"
-                                class="w-full border border-slate-200 rounded-lg p-2 text-xs font-semibold bg-slate-50"></select>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto border border-slate-200 rounded-lg">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                                <tr>
-                                    <th class="p-2.5">Chỉ số</th>
-                                    <th id="th-month-1" class="p-2.5 text-right">Tháng 1</th>
-                                    <th id="th-month-2" class="p-2.5 text-right">Tháng 2</th>
-                                    <th class="p-2.5 text-right">Chênh lệch</th>
-                                </tr>
-                            </thead>
-                            <tbody id="comparison-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-
-            <!-- TAB 2: QUẢN LÝ PHÒNG -->
-            <div id="tab-rooms" class="admin-tab-content hidden space-y-4">
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                                class="fa-solid fa-list mr-1 text-indigo-600"></i>
-                            Danh Sách Phòng (<span id="room-count-badge">0</span>/12)
-                        </h2>
-                        <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-                            <button onclick="promptNextMonth(event)"
-                                class="text-[11px] bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1">
-                                <i class="fa-solid fa-calendar-plus"></i> Chốt Tháng Mới
-                            </button>
-                            <button id="btn-add-room" onclick="openAddRoomModal()"
-                                class="text-[11px] sm:text-xs bg-slate-900 text-white px-3 py-2 rounded-lg hover:bg-slate-800 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1 ml-auto sm:ml-0">
-                                <i class="fa-solid fa-plus"></i> Thêm Phòng
-                            </button>
-                            <button onclick="exportBackup('json')" class="text-[11px] bg-emerald-600 text-white px-3 py-2 rounded-lg hover:bg-emerald-700 font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-download"></i> Xuất JSON
-                            </button>
-                            <button onclick="exportBackup('xlsx')" class="text-[11px] bg-cyan-600 text-white px-3 py-2 rounded-lg hover:bg-cyan-700 font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-file-excel"></i> Xuất Excel
-                            </button>
-                            <button onclick="document.getElementById('backup-file-input').click()" class="text-[11px] bg-slate-100 text-slate-700 px-3 py-2 rounded-lg hover:bg-slate-200 font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-upload"></i> Nhập sao lưu
-                            </button>
-                            <input id="backup-file-input" type="file" accept=".json,.xlsx,.xls" class="hidden" onchange="importBackupFile(this.files[0])">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-100">
-                        <div class="animated-border-box border border-slate-200 rounded-lg">
-                            <input type="text" id="admin-search-kw" placeholder="Tìm tên phòng hoặc tên khách..."
-                                class="w-full px-3 py-2 text-xs bg-transparent" oninput="renderFilteredRooms()">
-                        </div>
-                        <div class="animated-border-box border border-slate-200 rounded-lg">
-                            <select id="admin-filter-status"
-                                class="w-full px-3 py-2 text-xs bg-transparent font-medium text-slate-700"
-                                onchange="renderFilteredRooms()">
-                                <option value="all">Tất cả trạng thái thanh toán</option>
-                                <option value="paid">Đã thanh toán</option>
-                                <option value="unpaid">Chưa thanh toán</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="room-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"></div>
-                </section>
-            </div>
-
-            <!-- TAB 3: LỊCH SỬ HÓA ĐƠN -->
-            <div id="tab-invoices" class="admin-tab-content hidden space-y-4">
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                                class="fa-solid fa-database mr-2 text-indigo-600"></i> Tra Cứu Phiếu Tính Tiền Đã In
-                        </h2>
-                        <button onclick="clearAllInvoices(event)"
-                            class="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg font-semibold transition-all">
-                            <i class="fa-solid fa-trash-can mr-1"></i> Xóa tất cả lịch sử
-                        </button>
-                    </div>
-                    <div id="invoice-history-cards" class="space-y-2.5"></div>
-                </section>
-            </div>
-
-            <!-- TAB 4: YÊU CẦU XUẤT HÓA ĐƠN -->
-            <div id="tab-payment-requests" class="admin-tab-content hidden space-y-4">
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                    <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                            class="fa-solid fa-file-invoice-dollar mr-2 text-indigo-600"></i> Yêu Cầu Xuất Hóa Đơn Từ
-                        Khách</h2>
-                    <p class="text-[11px] text-slate-500">Khách chỉ được in hóa đơn sau khi Chủ Trọ xác nhận đã nhận
-                        tiền.</p>
-                    <div id="payment-requests-container" class="space-y-2.5"></div>
-                </section>
-            </div>
-
-            <!-- TAB 5: SỰ CỐ -->
-            <div id="tab-issues" class="admin-tab-content hidden space-y-4">
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                    <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                            class="fa-solid fa-screwdriver-wrench mr-2 text-indigo-600"></i> Báo Cố Từ Khách</h2>
-                    <div id="admin-issues-container" class="space-y-2.5"></div>
-                </section>
-            </div>
-
-            <!-- TAB 6: NHẮN TIN (QUẢN TRỊ) -->
-            <div id="tab-chats" class="admin-tab-content hidden space-y-4">
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                    <div
-                        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-2">
-                        <div>
-                            <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                                    class="fa-solid fa-comments mr-2 text-indigo-600"></i> Trung Tâm Nhắn Tin Khách Thuê
+                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
+                            <h2 class="text-sm sm:text-base font-bold text-slate-800">
+                                <i class="fa-solid fa-chart-column mr-2 text-indigo-600"></i> Dự Kiến Và Thực Tế Theo
+                                Tháng
                             </h2>
-                            <p class="text-[11px] text-slate-500">Trao đổi trực tiếp với từng phòng. Tin nhắn tự động
-                                được lưu trữ.</p>
-                        </div>
-                        <button onclick="clearAllChatsDatabase(event)"
-                            class="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg font-semibold transition-all shrink-0">
-                            <i class="fa-solid fa-trash-can mr-1"></i> Làm sạch CSDL Tin Nhắn
-                        </button>
+                            <div class="relative h-60 sm:h-72 w-full">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </section>
+                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
+                            <h2 class="text-sm sm:text-base font-bold text-slate-800">
+                                <i class="fa-solid fa-clock-rotate-left mr-2 text-rose-600"></i> Lịch Sử Công Nợ Theo
+                                Tháng
+                            </h2>
+                            <div id="debt-history-report" class="overflow-x-auto"></div>
+                        </section>
+
+                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
+                            <h2 class="text-sm sm:text-base font-bold text-slate-800">
+                                <i class="fa-solid fa-code-compare mr-2 text-indigo-600"></i> So Sánh Doanh Thu Theo
+                                Tháng
+                            </h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Tháng 1
+                                        (Gốc):</label>
+                                    <select id="compare-month-1" onchange="renderRevenueComparison()"
+                                        class="w-full border border-slate-200 rounded-lg p-2 text-xs font-semibold bg-slate-50"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Tháng 2 (So
+                                        sánh):</label>
+                                    <select id="compare-month-2" onchange="renderRevenueComparison()"
+                                        class="w-full border border-slate-200 rounded-lg p-2 text-xs font-semibold bg-slate-50"></select>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                                        <tr>
+                                            <th class="p-2.5">Chỉ số</th>
+                                            <th id="th-month-1" class="p-2.5 text-right">Tháng 1</th>
+                                            <th id="th-month-2" class="p-2.5 text-right">Tháng 2</th>
+                                            <th class="p-2.5 text-right">Chênh lệch</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="comparison-table-body" class="divide-y divide-slate-100 text-slate-700">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                        <div class="border border-slate-200 rounded-xl p-2 space-y-1 bg-slate-50/50 max-h-[500px] overflow-y-auto"
-                            id="admin-chat-room-list">
-                        </div>
-                        <div class="md:col-span-2 border border-slate-200 rounded-xl p-3 flex flex-col h-[500px] bg-white"
-                            id="admin-chat-box-container">
-                            <div class="text-center text-slate-400 my-auto text-xs">Vui lòng chọn một phòng bên trái để
-                                bắt đầu nhắn tin.</div>
-                        </div>
+
+                    <!-- TAB 2: QUẢN LÝ PHÒNG -->
+                    <div id="tab-rooms" class="admin-tab-content hidden space-y-4">
+                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
+                                        class="fa-solid fa-list mr-1 text-indigo-600"></i>
+                                    Danh Sách Phòng (<span id="room-count-badge">0</span>/12)
+                                </h2>
+                                <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+                                    <button onclick="promptNextMonth(event)"
+                                        class="text-[11px] bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1">
+                                        <i class="fa-solid fa-calendar-plus"></i> Chốt Tháng Mới
+                                    </button>
+                                    <button id="btn-add-room" onclick="openAddRoomModal()"
+                                        class="text-[11px] sm:text-xs bg-slate-900 text-white px-3 py-2 rounded-lg hover:bg-slate-800 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1 ml-auto sm:ml-0">
+                                        <i class="fa-solid fa-plus"></i> Thêm Phòng
+                                    </button>
+                                    <button onclick="exportBackup('json')"
+                                        class="text-[11px] bg-emerald-600 text-white px-3 py-2 rounded-lg hover:bg-emerald-700 font-semibold flex items-center gap-1">
+                                        <i class="fa-solid fa-download"></i> Xuất JSON
+                                    </button>
+                                    <button onclick="exportBackup('xlsx')"
+                                        class="text-[11px] bg-cyan-600 text-white px-3 py-2 rounded-lg hover:bg-cyan-700 font-semibold flex items-center gap-1">
+                                        <i class="fa-solid fa-file-excel"></i> Xuất Excel
+                                    </button>
+                                    <button onclick="document.getElementById('backup-file-input').click()"
+                                        class="text-[11px] bg-slate-100 text-slate-700 px-3 py-2 rounded-lg hover:bg-slate-200 font-semibold flex items-center gap-1">
+                                        <i class="fa-solid fa-upload"></i> Nhập sao lưu
+                                    </button>
+                                    <input id="backup-file-input" type="file" accept=".json,.xlsx,.xls" class="hidden"
+                                        onchange="importBackupFile(this.files[0])">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-100">
+                                <div class="animated-border-box border border-slate-200 rounded-lg">
+                                    <input type="text" id="admin-search-kw"
+                                        placeholder="Tìm tên phòng hoặc tên khách..."
+                                        class="w-full px-3 py-2 text-xs bg-transparent" oninput="renderFilteredRooms()">
+                                </div>
+                                <div class="animated-border-box border border-slate-200 rounded-lg">
+                                    <select id="admin-filter-status"
+                                        class="w-full px-3 py-2 text-xs bg-transparent font-medium text-slate-700"
+                                        onchange="renderFilteredRooms()">
+                                        <option value="all">Tất cả trạng thái thanh toán</option>
+                                        <option value="paid">Đã thanh toán</option>
+                                        <option value="unpaid">Chưa thanh toán</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div id="room-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"></div>
+                        </section>
                     </div>
-                </section>
+
+                    <!-- TAB 3: LỊCH SỬ HÓA ĐƠN -->
+                    <div id="tab-invoices" class="admin-tab-content hidden space-y-4">
+                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                                <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
+                                        class="fa-solid fa-database mr-2 text-indigo-600"></i> Tra Cứu Phiếu Tính Tiền
+                                    Đã In
+                                </h2>
+                                <button onclick="clearAllInvoices(event)"
+                                    class="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg font-semibold transition-all">
+                                    <i class="fa-solid fa-trash-can mr-1"></i> Xóa tất cả lịch sử
+                                </button>
+                            </div>
+                            <div id="invoice-history-cards" class="space-y-2.5"></div>
+                        </section>
+                    </div>
+
+                    <!-- TAB 4: YÊU CẦU XUẤT HÓA ĐƠN -->
+                    <div id="tab-payment-requests" class="admin-tab-content hidden space-y-4">
+                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
+                            <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
+                                    class="fa-solid fa-file-invoice-dollar mr-2 text-indigo-600"></i> Yêu Cầu Xuất Hóa
+                                Đơn Từ
+                                Khách</h2>
+                            <p class="text-[11px] text-slate-500">Khách chỉ được in hóa đơn sau khi Chủ Trọ xác nhận đã
+                                nhận
+                                tiền.</p>
+                            <div id="payment-requests-container" class="space-y-2.5"></div>
+                        </section>
+                    </div>
+
+                    <!-- TAB 5: SỰ CỐ -->
+                    <div id="tab-issues" class="admin-tab-content hidden space-y-4">
+                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
+                            <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
+                                    class="fa-solid fa-screwdriver-wrench mr-2 text-indigo-600"></i> Báo Cố Từ Khách
+                            </h2>
+                            <div id="admin-issues-container" class="space-y-2.5"></div>
+                        </section>
+                    </div>
+
+                    <!-- TAB 6: NHẮN TIN (QUẢN TRỊ) -->
+                    <div id="tab-chats" class="admin-tab-content hidden space-y-4">
+                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
+                            <div
+                                class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-2">
+                                <div>
+                                    <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
+                                            class="fa-solid fa-comments mr-2 text-indigo-600"></i> Trung Tâm Nhắn Tin
+                                        Khách Thuê
+                                    </h2>
+                                    <p class="text-[11px] text-slate-500">Trao đổi trực tiếp với từng phòng. Tin nhắn tự
+                                        động
+                                        được lưu trữ.</p>
+                                </div>
+                                <button onclick="clearAllChatsDatabase(event)"
+                                    class="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg font-semibold transition-all shrink-0">
+                                    <i class="fa-solid fa-trash-can mr-1"></i> Làm sạch CSDL Tin Nhắn
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                                <div class="border border-slate-200 rounded-xl p-2 space-y-1 bg-slate-50/50 max-h-[500px] overflow-y-auto"
+                                    id="admin-chat-room-list">
+                                </div>
+                                <div class="md:col-span-2 border border-slate-200 rounded-xl p-3 flex flex-col h-[500px] bg-white"
+                                    id="admin-chat-box-container">
+                                    <div class="text-center text-slate-400 my-auto text-xs">Vui lòng chọn một phòng bên
+                                        trái để
+                                        bắt đầu nhắn tin.</div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
             </div>
-            </div>
-        </div>
         </div>
     </main>
 
     <!-- Hidden Print Area -->
     <div id="printArea" class="hidden">
-        <div style="text-align: center; margin-bottom: 8px;">
-            <h2 style="font-weight: bold; font-size: 16px;">HÓA ĐƠN THANH TOÁN TIỀN TRỌ</h2>
-            <p id="print-date" style="font-size: 11px; color: #555;"></p>
+        <div style="text-align: center; margin-bottom: 6px;">
+            <h2 style="font-weight: bold; font-size: 15px;">HÓA ĐƠN TIỀN TRỌ</h2>
+            <p id="print-date" style="font-size: 10px; margin: 2px 0;"></p>
         </div>
-        <div style="font-size: 12px; line-height: 1.5;">
+        <div style="font-size: 11px; line-height: 1.4;">
             <p><strong>Phòng:</strong> <span id="p-room"></span></p>
             <p><strong>Khách thuê:</strong> <span id="p-tenant"></span> (<span id="p-occupants"></span> người)</p>
-            <hr style="border: 0; border-top: 1px solid #ddd; margin: 8px 0;">
-            <p>Tiền phòng cố định: <span id="p-price"></span></p>
+            <hr style="border: 0; border-top: 1px dashed #000; margin: 6px 0;">
+            <p>Tiền phòng: <span id="p-price"></span></p>
             <p>Tiền Điện (<span id="p-elec-qty"></span> kWh): <span id="p-elec"></span></p>
             <p>Tiền Nước: <span id="p-water"></span></p>
-            <p style="font-size: 11px; color: #555; margin-left: 10px; margin-top: -2px;" id="p-water-desc"></p>
+            <p style="font-size: 10px; margin-left: 8px; margin-top: -2px;" id="p-water-desc"></p>
             <p>Dịch vụ khác: <span id="p-service"></span></p>
             <p id="p-debt-row">Nợ kỳ trước: <span id="p-debt"></span></p>
-            <hr style="border: 0; border-top: 1px solid #ddd; margin: 8px 0;">
-            <p style="font-size: 14px; font-weight: bold;">TỔNG CỘNG: <span id="p-total" style="color: #4f46e5;"></span>
-            </p>
-            <p style="margin-top: 4px;"><strong>Trạng thái:</strong> <span id="p-status"></span></p>
-        </div>
-        <div
-            style="display: flex; justify-content: space-between; margin-top: 16px; text-align: center; font-size: 10px;">
-            <div>
-                <p><strong>Chủ trọ</strong><br>(Ký, ghi rõ họ tên)</p>
-            </div>
-            <div>
-                <p><strong>Người nộp tiền</strong><br>(Ký, ghi rõ họ tên)</p>
-            </div>
+            <hr style="border: 0; border-top: 1px dashed #000; margin: 6px 0;">
+            <p style="font-size: 13px; font-weight: bold;">TỔNG CỘNG: <span id="p-total"></span></p>
+            <p style="margin-top: 2px;"><strong>Trạng thái:</strong> <span id="p-status"></span></p>
         </div>
     </div>
 
@@ -706,7 +746,9 @@
                 <input type="text" id="tenant-chat-input" placeholder="Nhập nội dung tin nhắn..."
                     class="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:border-cyan-600 bg-white"
                     onkeypress="if(event.key==='Enter') sendTenantMessage()">
-                <label class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs cursor-pointer" title="Gửi hình ảnh">
+                <label
+                    class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs cursor-pointer"
+                    title="Gửi hình ảnh">
                     <i class="fa-solid fa-image"></i>
                     <input type="file" id="tenant-chat-image" accept="image/*" class="hidden">
                 </label>
@@ -764,23 +806,30 @@
                 </div>
 
                 <div class="bg-indigo-50/60 p-3 rounded-xl border border-indigo-100 space-y-2">
-                    <span class="font-bold text-slate-700 text-xs block"><i class="fa-solid fa-file-signature mr-1 text-indigo-600"></i>Thông tin hợp đồng & tiền cọc</span>
+                    <span class="font-bold text-slate-700 text-xs block"><i
+                            class="fa-solid fa-file-signature mr-1 text-indigo-600"></i>Thông tin hợp đồng & tiền
+                        cọc</span>
                     <div class="grid grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-bold mb-1 text-slate-700">Số hợp đồng:</label>
-                            <input type="text" id="room-contract-number" maxlength="100" class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
+                            <input type="text" id="room-contract-number" maxlength="100"
+                                class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold mb-1 text-slate-700">Tiền cọc (đ):</label>
-                            <input type="text" id="room-deposit" maxlength="20" value="0" onfocus="handleNumFocus(this)" onblur="handleNumBlur(this, 0)" oninput="formatAndCalculate(this)" class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
+                            <input type="text" id="room-deposit" maxlength="20" value="0" onfocus="handleNumFocus(this)"
+                                onblur="handleNumBlur(this, 0)" oninput="formatAndCalculate(this)"
+                                class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold mb-1 text-slate-700">Ngày bắt đầu:</label>
-                            <input type="date" id="room-start-date" class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
+                            <input type="date" id="room-start-date"
+                                class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold mb-1 text-slate-700">Ngày kết thúc:</label>
-                            <input type="date" id="room-end-date" class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
+                            <input type="date" id="room-end-date"
+                                class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white">
                         </div>
                     </div>
                 </div>
@@ -1476,8 +1525,8 @@
             container.innerHTML = `<table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
                 <thead class="bg-slate-50 text-slate-700 font-bold"><tr><th class="p-2.5">Tháng</th><th class="p-2.5">Phòng</th><th class="p-2.5 text-right">Công nợ chốt</th></tr></thead>
                 <tbody class="divide-y divide-slate-100">${Object.keys(grouped).map(month => grouped[month].rooms.map(row =>
-                    `<tr><td class="p-2.5">${esc(month)}</td><td class="p-2.5">${esc(row.roomName)}</td><td class="p-2.5 text-right font-semibold text-rose-600">${row.amount.toLocaleString('vi-VN')} đ</td></tr>`
-                ).join('') + `<tr class="bg-rose-50/50 font-bold"><td class="p-2.5" colspan="2">Tổng ${esc(month)}</td><td class="p-2.5 text-right text-rose-600">${grouped[month].total.toLocaleString('vi-VN')} đ</td></tr>`).join('')}</tbody>
+                `<tr><td class="p-2.5">${esc(month)}</td><td class="p-2.5">${esc(row.roomName)}</td><td class="p-2.5 text-right font-semibold text-rose-600">${row.amount.toLocaleString('vi-VN')} đ</td></tr>`
+            ).join('') + `<tr class="bg-rose-50/50 font-bold"><td class="p-2.5" colspan="2">Tổng ${esc(month)}</td><td class="p-2.5 text-right text-rose-600">${grouped[month].total.toLocaleString('vi-VN')} đ</td></tr>`).join('')}</tbody>
             </table>`;
         }
 
