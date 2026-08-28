@@ -81,18 +81,51 @@
                     margin: 0 !important;
                     padding: 3mm 4mm !important;
                     background: #fff !important;
-                    font-weight: bold !important;
-                    font-family: 'Courier New', Courier, monospace !important;
+                    font-weight: 500 !important;
+                    font-family: Arial, 'Helvetica Neue', sans-serif !important;
                     font-size: 12px !important;
+                    line-height: 1.45 !important;
                     color: #000 !important;
-                    -webkit-text-stroke: 0.3px #000 !important;
+                    -webkit-text-stroke: 0 !important;
                 }
 
                 #printArea h2 {
-                    font-size: 18px !important;
-                    font-weight: bold !important;
-                    margin: 0 0 4px !important;
+                    font-size: 17px !important;
+                    font-weight: 700 !important;
+                    letter-spacing: 0 !important;
+                    margin: 0 0 5px !important;
                     text-align: center !important;
+                }
+
+                #printArea p {
+                    font-size: 12px !important;
+                    line-height: 1.45 !important;
+                    margin: 1px 0 !important;
+                    font-weight: 500 !important;
+                }
+
+                #printArea p strong {
+                    font-weight: 700 !important;
+                }
+
+                #printArea #print-date {
+                    font-size: 10px !important;
+                    line-height: 1.3 !important;
+                }
+
+                #printArea #p-water-desc {
+                    font-size: 10px !important;
+                    line-height: 1.3 !important;
+                    margin: 0 0 2px 8px !important;
+                }
+
+                #printArea #p-total {
+                    font-size: 13px !important;
+                    font-weight: 700 !important;
+                }
+
+                #printArea #p-status {
+                    font-weight: 600 !important;
                 }
 
                 #printArea p,
@@ -139,50 +172,108 @@
             }
 
             .loading-orb {
-                width: 58px;
-                height: 58px;
-                border-radius: 9999px;
-                background: conic-gradient(from 0deg, #4f46e5, #06b6d4, #818cf8, #4f46e5);
-                animation: loading-spin 1.4s linear infinite;
+                width: 64px;
+                height: 64px;
                 position: relative;
-                box-shadow: 0 0 30px rgba(79, 70, 229, 0.28);
+                display: grid;
+                place-items: center;
+                color: #0f766e;
             }
 
+            .loading-orb::before,
             .loading-orb::after {
                 content: '';
                 position: absolute;
-                inset: 5px;
-                border-radius: inherit;
-                background: #fff;
+                inset: 3px;
+                border: 2px solid rgba(20, 184, 166, 0.18);
+                border-radius: 9999px;
             }
 
             .loading-orb::before {
-                content: '';
-                position: absolute;
-                inset: 20px;
-                border-radius: inherit;
-                background: #4f46e5;
-                z-index: 1;
-                animation: loading-pulse 1.4s ease-in-out infinite;
+                border-top-color: #14b8a6;
+                border-right-color: #f59e0b;
+                animation: loading-scan 1.15s linear infinite;
             }
 
-            @keyframes loading-spin {
+            .loading-orb::after {
+                inset: 11px;
+                border-color: rgba(245, 158, 11, 0.22);
+                border-left-color: #f59e0b;
+                animation: loading-scan 1.8s linear infinite reverse;
+            }
+
+            .loading-core {
+                width: 34px;
+                height: 34px;
+                display: grid;
+                place-items: center;
+                border-radius: 12px;
+                background: linear-gradient(145deg, #ccfbf1, #fef3c7);
+                box-shadow: 0 4px 12px rgba(15, 118, 110, 0.16);
+                animation: loading-breathe 1.5s ease-in-out infinite;
+                z-index: 1;
+            }
+
+            .loading-core i {
+                font-size: 15px;
+            }
+
+            @keyframes loading-scan {
                 to {
                     transform: rotate(360deg);
                 }
             }
 
-            @keyframes loading-pulse {
-
+            @keyframes loading-breathe {
                 0%,
                 100% {
-                    transform: scale(0.75);
-                    opacity: 0.65;
+                    transform: scale(0.92);
                 }
 
                 50% {
-                    transform: scale(1);
+                    transform: scale(1.08);
+                }
+            }
+
+            .loading-dots span {
+                display: inline-block;
+                width: 4px;
+                height: 4px;
+                margin: 0 2px;
+                border-radius: 9999px;
+                background: #14b8a6;
+                animation: loading-dot 1s ease-in-out infinite;
+            }
+
+            .loading-dots span:nth-child(2) {
+                animation-delay: 0.14s;
+                background: #f59e0b;
+            }
+
+            .loading-dots span:nth-child(3) {
+                animation-delay: 0.28s;
+            }
+
+            @keyframes loading-dot {
+                0%,
+                60%,
+                100% {
+                    transform: translateY(0);
+                    opacity: 0.35;
+                }
+
+                30% {
+                    transform: translateY(-3px);
                     opacity: 1;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .loading-orb::before,
+                .loading-orb::after,
+                .loading-core,
+                .loading-dots span {
+                    animation: none;
                 }
             }
 
@@ -285,10 +376,13 @@
         class="fixed inset-0 bg-slate-900/40 z-[9999] hidden flex flex-col items-center justify-center backdrop-blur-xs">
         <div
             class="bg-white/95 p-7 rounded-2xl shadow-2xl flex flex-col items-center max-w-xs w-full mx-4 border border-white/80">
-            <div class="loading-orb" aria-hidden="true"></div>
+            <div class="loading-orb" aria-hidden="true">
+                <div class="loading-core"><i class="fa-solid fa-building" aria-hidden="true"></i></div>
+            </div>
             <p class="text-sm font-bold text-slate-800 mt-4">Đang xử lý</p>
             <p id="loading-text" class="text-xs font-medium text-slate-500 mt-1 text-center">Vui lòng chờ trong giây
                 lát...</p>
+            <div class="loading-dots mt-2" aria-hidden="true"><span></span><span></span><span></span></div>
             <div class="w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-4">
                 <div class="h-full w-1/2 bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full animate-pulse"></div>
             </div>
@@ -2341,7 +2435,17 @@
                 container.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">Chưa có hóa đơn nào được lưu.</p>`;
                 return;
             }
-            container.innerHTML = [...invoicesData].reverse().map(inv => `
+            const sortedInvoices = [...invoicesData].sort((a, b) => {
+                const roomNumberDifference = extractRoomNumber(a.roomName) - extractRoomNumber(b.roomName);
+                if (roomNumberDifference !== 0) return roomNumberDifference;
+
+                const roomNameDifference = String(a.roomName || '').localeCompare(String(b.roomName || ''), 'vi');
+                if (roomNameDifference !== 0) return roomNameDifference;
+
+                return Number(b.createdAt || 0) - Number(a.createdAt || 0);
+            });
+
+            container.innerHTML = sortedInvoices.map(inv => `
                 <div class="p-3 border border-slate-200 rounded-xl bg-slate-50/50 space-y-1.5 text-xs">
                     <div class="flex justify-between items-center">
                         <span class="font-bold text-slate-800">${esc(inv.roomName)} - ${esc(inv.tenantName)}</span>
