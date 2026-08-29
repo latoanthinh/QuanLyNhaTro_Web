@@ -64,15 +64,15 @@
         <div id="view-tenant" class="space-y-5 max-w-lg mx-auto">
             <div
                 class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-2xl p-5 text-white shadow-md text-center break-words border border-slate-800">
-                <h2 class="text-lg font-bold mb-1 tracking-tight">Tra Cứu Hóa Đơn & QR Pay</h2>
-                <p class="text-xs text-slate-300">Nhập tên phòng hoặc Số Điện Thoại để xem chi tiết tiền trọ
+                <h2 class="text-lg font-bold mb-1 tracking-tight"> CổngTra Cứu Hóa Đơn</h2>
+                <p class="text-xs text-slate-300">Nhập tên phòng để xem chi tiết tiền trọ
                 </p>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
                 <div class="flex flex-col sm:flex-row gap-2.5">
                     <div class="animated-border-box border border-slate-200 rounded-lg flex-1">
-                        <input type="text" id="search-keyword" placeholder="VD: Phòng 1 hoặc SĐT..."
+                        <input type="text" id="search-keyword" placeholder="VD: Phòng 1 "
                             class="w-full px-3.5 py-2.5 text-sm bg-transparent rounded-lg"
                             onkeypress="if(event.key==='Enter') searchRoomForTenant()">
                     </div>
@@ -157,46 +157,68 @@
         <div id="view-admin" class="hidden space-y-5">
             <div class="admin-layout flex items-start gap-3 relative">
                 <div id="admin-nav-panel"
-                    class="admin-nav-panel bg-white rounded-xl shadow-xs p-2 flex flex-col gap-1.5 border border-slate-200">
+                    class="admin-nav-panel professional-sidebar rounded-[22px] border border-slate-200 bg-white p-3 flex flex-col gap-2.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+                    <div class="sidebar-brand flex items-center gap-2.5 px-2.5 py-2.5 rounded-[16px] bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white shadow-[0_12px_24px_rgba(99,102,241,0.28)]">
+                        <button onclick="toggleAdminNav()" id="admin-nav-toggle"
+                            class="admin-nav-toggle flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white shadow-sm backdrop-blur-sm transition-all duration-200"
+                            title="Ẩn/hiện thanh điều hướng" aria-expanded="true">
+                            <i class="fa-solid fa-bars text-sm"></i>
+                        </button>
+                        <div class="min-w-0">
+                            <div class="text-[10px] font-medium uppercase tracking-[0.12em] text-indigo-100/90">Quản trị</div>
+                            <div class="text-[15px] font-bold leading-none">Tổng Quan</div>
+                        </div>
+                    </div>
+
                     <button onclick="switchAdminTab('tab-overview')" id="nav-tab-overview"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-indigo-600 text-white flex items-center gap-2 shrink-0 transition-all text-left">
-                        <i class="fa-solid fa-chart-pie"></i> Tổng Quan
+                        class="admin-tab-btn sidebar-item active-sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 transition-all text-left">
+                        <span class="sidebar-icon bg-white/15"><i class="fa-solid fa-chart-pie"></i></span>
+                        <span>Tổng Quan</span>
                     </button>
                     <button onclick="switchAdminTab('tab-rooms')" id="nav-tab-rooms"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 transition-all text-left">
-                        <i class="fa-solid fa-door-open"></i> Quản Lý Phòng
+                        class="admin-tab-btn sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 transition-all text-left">
+                        <span class="sidebar-icon"><i class="fa-solid fa-door-open"></i></span>
+                        <span>Quản Lý Phòng</span>
                     </button>
                     <button onclick="switchAdminTab('tab-invoices')" id="nav-tab-invoices"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 transition-all text-left">
-                        <i class="fa-solid fa-receipt"></i> Lịch Sử HĐ
+                        class="admin-tab-btn sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 transition-all text-left">
+                        <span class="sidebar-icon"><i class="fa-solid fa-receipt"></i></span>
+                        <span>Lịch Sử HĐ</span>
                     </button>
                     <button onclick="switchAdminTab('tab-payment-requests')" id="nav-tab-payment-requests"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> Yêu Cầu HĐ <span id="badge-payment-requests"
-                            class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+                        class="admin-tab-btn sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 relative transition-all text-left">
+                        <span class="sidebar-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+                        <span>Yêu Cầu HĐ</span>
+                        <span id="badge-payment-requests" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden ml-auto">0</span>
                     </button>
                     <button onclick="switchAdminTab('tab-issues')" id="nav-tab-issues"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
-                        <i class="fa-solid fa-screwdriver-wrench"></i> Sự Cố <span id="badge-issues"
-                            class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+                        class="admin-tab-btn sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 relative transition-all text-left">
+                        <span class="sidebar-icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                        <span>Sự Cố</span>
+                        <span id="badge-issues" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden ml-auto">0</span>
                     </button>
                     <button onclick="switchAdminTab('tab-chats')" id="nav-tab-chats"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
-                        <i class="fa-solid fa-comments"></i> Nhắn Tin <span id="badge-chats"
-                            class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+                        class="admin-tab-btn sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 relative transition-all text-left">
+                        <span class="sidebar-icon"><i class="fa-solid fa-comments"></i></span>
+                        <span>Nhắn Tin</span>
+                        <span id="badge-chats" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden ml-auto">0</span>
                     </button>
                     <button onclick="logoutAdmin()"
-                        class="py-2.5 px-3 text-xs font-semibold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center gap-2 shrink-0 mt-auto transition-all text-left">
-                        <i class="fa-solid fa-lock"></i> Khóa
+                        class="sidebar-item sidebar-logout h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 mt-auto transition-all text-left">
+                        <span class="sidebar-icon"><i class="fa-solid fa-lock"></i></span>
+                        <span>Khóa</span>
                     </button>
                 </div>
                 <button onclick="toggleAdminNav()" id="admin-nav-toggle"
-                    class="admin-nav-toggle absolute left-0 top-4 -translate-x-1/2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center shadow-xs z-10"
+                    class="admin-nav-toggle absolute left-0 top-4 -translate-x-1/2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-full w-9 h-9 flex items-center justify-center shadow-sm z-10"
                     title="Ẩn/hiện thanh điều hướng" aria-expanded="true">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <div class="flex-1 min-w-0 space-y-5">
-                    <span class="text-xs font-semibold text-slate-500">Bảng điều khiển Chủ Trọ</span>
+                <div class="flex-1 min-w-0 space-y-5 dashboard-shell">
+                    <div class="dashboard-heading-chip">
+                        <span class="dashboard-heading-icon"><i class="fa-solid fa-gauge-high"></i></span>
+                        <span>Bảng điều khiển Chủ Trọ</span>
+                    </div>
 
                     <!-- TAB 1: TỔNG QUAN -->
                     <div id="tab-overview" class="admin-tab-content space-y-4">
@@ -261,28 +283,25 @@
                             </div>
                         </section>
 
-                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
-                            <h2 class="text-sm sm:text-base font-bold text-slate-800">
-                                <i class="fa-solid fa-chart-column mr-2 text-indigo-600"></i> Dự Kiến Và Thực Tế Theo
-                                Tháng
-                            </h2>
+                        <section class="dashboard-panel">
+                            <div class="dashboard-panel__header">
+                                <h2><i class="fa-solid fa-chart-column"></i> Dự Kiến Và Thực Tế Theo Tháng</h2>
+                            </div>
                             <div class="relative h-60 sm:h-72 w-full">
                                 <canvas id="revenueChart"></canvas>
                             </div>
                         </section>
-                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
-                            <h2 class="text-sm sm:text-base font-bold text-slate-800">
-                                <i class="fa-solid fa-clock-rotate-left mr-2 text-rose-600"></i> Lịch Sử Công Nợ Theo
-                                Tháng
-                            </h2>
+                        <section class="dashboard-panel">
+                            <div class="dashboard-panel__header">
+                                <h2><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Công Nợ Theo Tháng</h2>
+                            </div>
                             <div id="debt-history-report" class="overflow-x-auto"></div>
                         </section>
 
-                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
-                            <h2 class="text-sm sm:text-base font-bold text-slate-800">
-                                <i class="fa-solid fa-code-compare mr-2 text-indigo-600"></i> So Sánh Doanh Thu Theo
-                                Tháng
-                            </h2>
+                        <section class="dashboard-panel">
+                            <div class="dashboard-panel__header">
+                                <h2><i class="fa-solid fa-code-compare"></i> So Sánh Doanh Thu Theo Tháng</h2>
+                            </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Tháng 1
@@ -317,39 +336,36 @@
 
                     <!-- TAB 2: QUẢN LÝ PHÒNG -->
                     <div id="tab-rooms" class="admin-tab-content hidden space-y-4">
-                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-3">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                                <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                                        class="fa-solid fa-list mr-1 text-indigo-600"></i>
-                                    Danh Sách Phòng (<span id="room-count-badge">0</span>/12)
-                                </h2>
-                                <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+                        <section class="dashboard-panel">
+                            <div class="dashboard-panel__header flex-col sm:flex-row items-start sm:items-center gap-3">
+                                <h2><i class="fa-solid fa-list"></i> Danh Sách Phòng (<span id="room-count-badge">0</span>/12)</h2>
+                                <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto mobile-action-group">
                                     <button onclick="promptNextMonth(event)"
-                                        class="text-[11px] bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1">
+                                        class="mobile-action-btn text-[11px] bg-indigo-600 text-white px-3 py-2.5 rounded-lg hover:bg-indigo-700 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1.5">
                                         <i class="fa-solid fa-calendar-plus"></i> Chốt Tháng Mới
                                     </button>
                                     <button onclick="createPreCloseBackup()"
-                                        class="text-[11px] bg-violet-500 text-white px-3 py-2 rounded-lg hover:bg-violet-600 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1">
+                                        class="mobile-action-btn text-[11px] bg-violet-500 text-white px-3 py-2.5 rounded-lg hover:bg-violet-600 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1.5">
                                         <i class="fa-solid fa-floppy-disk"></i> Backup trước chốt
                                     </button>
                                     <button id="btn-add-room" onclick="openAddRoomModal()"
-                                        class="text-[11px] sm:text-xs bg-slate-900 text-white px-3 py-2 rounded-lg hover:bg-slate-800 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1 ml-auto sm:ml-0">
+                                        class="mobile-action-btn text-[11px] sm:text-xs bg-slate-900 text-white px-3 py-2.5 rounded-lg hover:bg-slate-800 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1.5 ml-auto sm:ml-0">
                                         <i class="fa-solid fa-plus"></i> Thêm Phòng
                                     </button>
                                     <button onclick="exportBackup('json')"
-                                        class="text-[11px] bg-emerald-600 text-white px-3 py-2 rounded-lg hover:bg-emerald-700 font-semibold flex items-center gap-1">
+                                        class="mobile-action-btn text-[11px] bg-emerald-600 text-white px-3 py-2.5 rounded-lg hover:bg-emerald-700 font-semibold flex items-center gap-1.5">
                                         <i class="fa-solid fa-download"></i> Xuất JSON
                                     </button>
                                     <button onclick="exportBackup('xlsx')"
-                                        class="text-[11px] bg-cyan-600 text-white px-3 py-2 rounded-lg hover:bg-cyan-700 font-semibold flex items-center gap-1">
+                                        class="mobile-action-btn text-[11px] bg-cyan-600 text-white px-3 py-2.5 rounded-lg hover:bg-cyan-700 font-semibold flex items-center gap-1.5">
                                         <i class="fa-solid fa-file-excel"></i> Xuất Excel
                                     </button>
                                     <button onclick="document.getElementById('backup-file-input').click()"
-                                        class="text-[11px] bg-slate-100 text-slate-700 px-3 py-2 rounded-lg hover:bg-slate-200 font-semibold flex items-center gap-1">
+                                        class="mobile-action-btn text-[11px] bg-slate-100 text-slate-700 px-3 py-2.5 rounded-lg hover:bg-slate-200 font-semibold flex items-center gap-1.5">
                                         <i class="fa-solid fa-upload"></i> Khôi phục backup
                                     </button>
                                     <button onclick="document.getElementById('backup-image-input').click()"
-                                        class="text-[11px] bg-amber-500 text-white px-3 py-2 rounded-lg hover:bg-amber-600 font-semibold flex items-center gap-1">
+                                        class="mobile-action-btn text-[11px] bg-amber-500 text-white px-3 py-2.5 rounded-lg hover:bg-amber-600 font-semibold flex items-center gap-1.5">
                                         <i class="fa-solid fa-image"></i> Xuất ảnh từ JSON
                                     </button>
                                     <input id="backup-file-input" type="file" accept=".json,.xlsx,.xls" class="hidden"
@@ -379,9 +395,9 @@
                             <div id="room-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"></div>
                         </section>
 
-                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                                <h2 class="text-sm sm:text-base font-bold text-slate-800"><i class="fa-solid fa-box-archive mr-1 text-violet-600"></i> Kho Backup Chốt Tháng</h2>
+                        <section class="dashboard-panel">
+                            <div class="dashboard-panel__header">
+                                <h2><i class="fa-solid fa-box-archive"></i> Kho Backup Chốt Tháng</h2>
                             </div>
                             <div id="archive-history-list" class="space-y-2.5"></div>
                         </section>
@@ -389,12 +405,9 @@
 
                     <!-- TAB 3: LỊCH SỬ HÓA ĐƠN -->
                     <div id="tab-invoices" class="admin-tab-content hidden space-y-4">
-                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                                <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                                        class="fa-solid fa-database mr-2 text-indigo-600"></i> Tra Cứu Phiếu Tính Tiền
-                                    Đã In
-                                </h2>
+                        <section class="dashboard-panel">
+                            <div class="dashboard-panel__header">
+                                <h2><i class="fa-solid fa-database"></i> Tra Cứu Phiếu Tính Tiền Đã In</h2>
                                 <button onclick="clearAllInvoices(event)"
                                     class="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg font-semibold transition-all">
                                     <i class="fa-solid fa-trash-can mr-1"></i> Xóa tất cả lịch sử
@@ -406,41 +419,32 @@
 
                     <!-- TAB 4: YÊU CẦU XUẤT HÓA ĐƠN -->
                     <div id="tab-payment-requests" class="admin-tab-content hidden space-y-4">
-                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                            <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                                    class="fa-solid fa-file-invoice-dollar mr-2 text-indigo-600"></i> Yêu Cầu Xuất Hóa
-                                Đơn Từ
-                                Khách</h2>
-                            <p class="text-[11px] text-slate-500">Khách chỉ được in hóa đơn sau khi Chủ Trọ xác nhận đã
-                                nhận
-                                tiền.</p>
+                        <section class="dashboard-panel">
+                            <div class="dashboard-panel__header">
+                                <h2><i class="fa-solid fa-file-invoice-dollar"></i> Yêu Cầu Xuất Hóa Đơn Từ Khách</h2>
+                            </div>
+                            <p class="text-[11px] text-slate-500">Khách chỉ được in hóa đơn sau khi Chủ Trọ xác nhận đã nhận tiền.</p>
                             <div id="payment-requests-container" class="space-y-2.5"></div>
                         </section>
                     </div>
 
                     <!-- TAB 5: SỰ CỐ -->
                     <div id="tab-issues" class="admin-tab-content hidden space-y-4">
-                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                            <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                                    class="fa-solid fa-screwdriver-wrench mr-2 text-indigo-600"></i> Báo Cố Từ Khách
-                            </h2>
+                        <section class="dashboard-panel">
+                            <div class="dashboard-panel__header">
+                                <h2><i class="fa-solid fa-screwdriver-wrench"></i> Báo Cố Từ Khách</h2>
+                            </div>
                             <div id="admin-issues-container" class="space-y-2.5"></div>
                         </section>
                     </div>
 
                     <!-- TAB 6: NHẮN TIN (QUẢN TRỊ) -->
                     <div id="tab-chats" class="admin-tab-content hidden space-y-4">
-                        <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                            <div
-                                class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-2">
+                        <section class="dashboard-panel">
+                            <div class="dashboard-panel__header flex-col sm:flex-row items-start sm:items-center gap-2">
                                 <div>
-                                    <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                                            class="fa-solid fa-comments mr-2 text-indigo-600"></i> Trung Tâm Nhắn Tin
-                                        Khách Thuê
-                                    </h2>
-                                    <p class="text-[11px] text-slate-500">Trao đổi trực tiếp với từng phòng. Tin nhắn tự
-                                        động
-                                        được lưu trữ.</p>
+                                    <h2><i class="fa-solid fa-comments"></i> Trung Tâm Nhắn Tin Khách Thuê</h2>
+                                    <p class="text-[11px] text-slate-500 mt-1">Trao đổi trực tiếp với từng phòng. Tin nhắn tự động được lưu trữ.</p>
                                 </div>
                                 <button onclick="clearAllChatsDatabase(event)"
                                     class="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg font-semibold transition-all shrink-0">
@@ -584,7 +588,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2.5">
+                <div class="grid grid-cols-3 gap-2.5">
                     <div>
                         <label class="block text-[11px] font-bold mb-1 text-slate-700">Tiền phòng (đ):</label>
                         <div class="animated-border-box border border-slate-200 rounded-lg">
@@ -599,6 +603,15 @@
                         <div class="animated-border-box border border-slate-200 rounded-lg">
                             <input type="text" id="elec-price" value="4,000"
                                 class="w-full px-3 py-2 text-xs font-medium bg-transparent"
+                                onfocus="handleNumFocus(this)" onblur="handleNumBlur(this, 0)"
+                                oninput="formatAndCalculate(this)">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold mb-1 text-slate-700">Nợ tháng trước (đ):</label>
+                        <div class="animated-border-box border border-slate-200 rounded-lg">
+                            <input type="text" id="room-previous-debt" value="0"
+                                class="w-full px-3 py-2 text-xs font-bold text-rose-600 bg-transparent"
                                 onfocus="handleNumFocus(this)" onblur="handleNumBlur(this, 0)"
                                 oninput="formatAndCalculate(this)">
                         </div>

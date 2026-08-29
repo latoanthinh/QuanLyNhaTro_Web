@@ -243,7 +243,7 @@
         window.switchAdminTab = function (tabId) {
             document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-600', 'text-white');
+                btn.classList.remove('active-sidebar-item', 'bg-indigo-600', 'text-white', 'bg-slate-50', 'text-slate-600');
                 btn.classList.add('bg-slate-50', 'text-slate-600');
             });
 
@@ -252,7 +252,7 @@
             const activeBtn = document.getElementById('nav-' + tabId);
             if (activeBtn) {
                 activeBtn.classList.remove('bg-slate-50', 'text-slate-600');
-                activeBtn.classList.add('bg-indigo-600', 'text-white');
+                activeBtn.classList.add('active-sidebar-item', 'bg-indigo-600', 'text-white');
             }
 
             if (tabId === 'tab-overview') renderOverviewAnalytics();
@@ -397,7 +397,7 @@
             const waterInfo = calculateWater(room);
             const service = parseNum(room.service);
             const currentTotal = price + elecTotal + waterInfo.total + service;
-            const debt = parseNum(room.debt);
+            const debt = Math.max(0, parseNum(room.previousMonthDebt ?? room.debt));
             const total = currentTotal + debt;
 
             return {
@@ -433,38 +433,70 @@
             const monthlyData = {};
             const now = new Date();
             const currentMonthKey = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-            const currentMonthInvoices = new Set();
+
+            const addMonthValue = (monthKey, key, value) => {
+                if (!monthKey) return;
+                if (!monthlyData[monthKey]) monthlyData[monthKey] = { expected: 0, paid: 0 };
+                monthlyData[monthKey][key] += value;
+            };
 
             invoicesData.forEach(inv => {
-                if (inv.status === 'Đã thanh toán') {
-                    const mKey = parseMonthFromDateStr(inv.createdDate);
-                    if (mKey) {
-                        if (!monthlyData[mKey]) monthlyData[mKey] = { expected: 0, paid: 0 };
-                        monthlyData[mKey].paid += parseNum(inv.total);
-                        if (mKey === currentMonthKey) currentMonthInvoices.add(inv.roomName);
-                    }
-                }
+                if (inv.status !== 'Đã thanh toán') return;
+                const mKey = parseMonthFromDateStr(inv.createdDate);
+                if (!mKey) return;
+                addMonthValue(mKey, 'paid', parseNum(inv.total));
             });
-
-            if (!monthlyData[currentMonthKey]) monthlyData[currentMonthKey] = { expected: 0, paid: 0 };
 
             roomsData.forEach(room => {
-                if (room.status === 'Đang thuê') {
-                    const details = getRoomTotalDetails(room);
-                    monthlyData[currentMonthKey].expected += details.total;
-                    if (room.paymentStatus === 'Đã thanh toán' && !currentMonthInvoices.has(room.name)) {
-                        monthlyData[currentMonthKey].paid += details.total;
-                    }
-                }
-            });
-
-            Object.keys(monthlyData).forEach(k => {
-                if (monthlyData[k].expected < monthlyData[k].paid) {
-                    monthlyData[k].expected = monthlyData[k].paid;
+                if (room.status !== 'Đang thuê') return;
+                const details = getRoomTotalDetails(room);
+                const monthKey = currentMonthKey;
+                addMonthValue(monthKey, 'expected', details.currentTotal);
+                if (room.paymentStatus === 'Đã thanh toán') {
+                    addMonthValue(monthKey, 'paid', details.currentTotal);
                 }
             });
 
             return monthlyData;
+        }
+
+        function getRoomCommittedDebt(room) {
+            if (!room || room.status !== 'Đang thuê') return 0;
+
+            const explicitDebt = Math.max(0, parseNum(room.previousMonthDebt ?? room.debt));
+            if (explicitDebt > 0) return explicitDebt;
+
+            const history = Array.isArray(room.debtHistory) ? room.debtHistory : [];
+            const lastClosedDebt = history.length
+                ? Math.max(0, parseNum(history[history.length - 1]?.amount))
+                : 0;
+
+            return lastClosedDebt;
+        }
+
+        function getInvoiceMonthKey(invoice) {
+            if (!invoice) return null;
+            const timestamp = Number(invoice.createdAt || Date.parse(invoice.createdDate || ''));
+            if (timestamp && Number.isFinite(timestamp)) {
+                return currentMonthKey(new Date(timestamp));
+            }
+            if (typeof invoice.createdDate === 'string') {
+                const parsed = parseMonthFromDateStr(invoice.createdDate);
+                if (parsed) return parsed;
+            }
+            return currentMonthKey();
+        }
+
+        function getCurrentMonthInvoices() {
+            const currentKey = currentMonthKey();
+            return invoicesData.filter(inv => getInvoiceMonthKey(inv) === currentKey);
+        }
+
+        function getCurrentMonthRequestForRoom(roomDocId) {
+            const currentKey = currentMonthKey();
+            return (paymentRequestsData || [])
+                .filter(req => req.roomDocId === roomDocId && getInvoiceMonthKey(req) === currentKey)
+                .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0] || null;
         }
 
         function getCurrentRevenueSummary() {
@@ -472,14 +504,14 @@
             roomsData.forEach(room => {
                 if (room.status !== 'Đang thuê') return;
                 const details = getRoomTotalDetails(room);
-                summary.expected += details.total;
-                if (room.paymentStatus === 'Đã thanh toán') summary.paid += details.total;
+                summary.expected += details.currentTotal;
+                if (room.paymentStatus === 'Đã thanh toán') summary.paid += details.currentTotal;
             });
             return summary;
         }
 
         function getOutstandingDebt() {
-            return roomsData.reduce((sum, room) => sum + Math.max(0, parseNum(room.debt)), 0);
+            return roomsData.reduce((sum, room) => sum + getRoomCommittedDebt(room), 0);
         }
 
         function getRecordedRevenue() {
@@ -696,7 +728,8 @@
                         } else if (room.status === 'Đang thuê') {
                             room.tenant = boundedText(room.tenant, 150);
                             room.occupants = Math.max(1, parseNum(room.occupants));
-                            room.debt = Math.max(0, parseNum(room.debt));
+                            room.previousMonthDebt = Math.max(0, parseNum(room.previousMonthDebt ?? room.debt));
+                        room.debt = room.previousMonthDebt;
                         }
                         room.phone = boundedText(room.phone, 30);
                         room.note = boundedText(room.note);
@@ -814,6 +847,16 @@
             }
         }
 
+        function normalizeSearchText(value) {
+            return String(value ?? '')
+                .trim()
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9\s]/g, '')
+                .replace(/\s+/g, ' ');
+        }
+
         function updateChatBadge() {
             let totalUnread = 0;
             Object.keys(chatsData).forEach(roomDocId => {
@@ -835,14 +878,16 @@
         }
 
         window.searchRoomForTenant = function () {
-            const kw = document.getElementById('search-keyword').value.trim().toLowerCase();
+            const rawKw = document.getElementById('search-keyword').value;
+            const kw = normalizeSearchText(rawKw);
             if (!kw) return Swal.fire({ title: 'Thông báo', text: 'Vui lòng nhập tên phòng hoặc SĐT', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
 
-            const found = roomsData.find(r =>
-                r.name.toLowerCase().includes(kw) ||
-                (r.phone && r.phone.includes(kw)) ||
-                (r.tenant && r.tenant.toLowerCase().includes(kw))
-            );
+            const found = roomsData.find(r => {
+                const roomName = normalizeSearchText(r.name);
+                const roomTenant = normalizeSearchText(r.tenant);
+                const roomPhone = normalizeSearchText(r.phone);
+                return roomName.includes(kw) || roomTenant.includes(kw) || roomPhone.includes(kw);
+            });
 
             if (!found) return Swal.fire({ title: 'Lỗi', text: 'Không tìm thấy thông tin phòng!', icon: 'error', customClass: { popup: 'rounded-xl text-xs' } });
             activeTenantRoom = found;
@@ -883,9 +928,7 @@
             const rejectionNotice = document.getElementById('tenant-rejection-notice');
             const rejectionReasonEl = document.getElementById('t-rejection-reason');
 
-            activeInvoiceRequest = paymentRequestsData
-                .filter(r => r.roomDocId === room.docId)
-                .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0] || null;
+            activeInvoiceRequest = getCurrentMonthRequestForRoom(room.docId);
 
             if (activeInvoiceRequest && activeInvoiceRequest.status === 'rejected') {
                 rejectionNotice.classList.remove('hidden');
@@ -1181,7 +1224,7 @@
             }
 
             const existing = paymentRequestsData
-                .filter(r => r.roomDocId === room.docId && r.status === 'pending')
+                .filter(r => r.roomDocId === room.docId && r.status === 'pending' && getInvoiceMonthKey(r) === currentMonthKey())
                 .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0];
 
             if (existing) {
@@ -1251,9 +1294,7 @@
                 return Swal.fire({ title: 'Không thể in hóa đơn', text: 'Phòng hiện không có người thuê.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             }
 
-            const request = paymentRequestsData
-                .filter(r => r.roomDocId === room.docId)
-                .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0];
+            const request = getCurrentMonthRequestForRoom(room.docId);
 
             if (room.paymentStatus !== 'Đã thanh toán' || !request || request.status !== 'approved') {
                 return Swal.fire({ title: 'Chưa được phép in', text: 'Khách phải thanh toán trước và Chủ Trọ phải xác nhận yêu cầu xuất hóa đơn.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
@@ -1323,8 +1364,9 @@
 
         function findInvoiceForRequest(request, room) {
             if (!request || !room) return null;
-            return invoicesData.find(inv => inv.requestId === request.id) ||
-                invoicesData
+            const currentMonthInvoicesList = getCurrentMonthInvoices();
+            return currentMonthInvoicesList.find(inv => inv.requestId === request.id) ||
+                currentMonthInvoicesList
                     .filter(inv => inv.roomName === room.name && inv.tenantName === (room.tenant || 'Chưa cập nhật'))
                     .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0] ||
                 null;
@@ -1349,11 +1391,12 @@
 
         function renderInvoiceHistory() {
             const container = document.getElementById('invoice-history-cards');
-            if (invoicesData.length === 0) {
-                container.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">Chưa có hóa đơn nào được lưu.</p>`;
+            const currentInvoices = getCurrentMonthInvoices();
+            if (currentInvoices.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">Chưa có hóa đơn nào được lưu cho tháng này.</p>`;
                 return;
             }
-            const sortedInvoices = [...invoicesData].sort((a, b) => {
+            const sortedInvoices = [...currentInvoices].sort((a, b) => {
                 const roomNumberDifference = extractRoomNumber(a.roomName) - extractRoomNumber(b.roomName);
                 if (roomNumberDifference !== 0) return roomNumberDifference;
 
@@ -1390,7 +1433,7 @@
                 return Swal.fire({ title: 'Không có quyền', text: authRequiredMessage(), icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             }
             const btn = evt?.currentTarget || evt?.target;
-            const invoice = invoicesData.find(inv => inv.id === invoiceId);
+            const invoice = getCurrentMonthInvoices().find(inv => inv.id === invoiceId) || invoicesData.find(inv => inv.id === invoiceId);
             if (!invoice) {
                 return Swal.fire({ title: 'Không tìm thấy hóa đơn', text: 'Hóa đơn không còn tồn tại trong lịch sử.', icon: 'error', customClass: { popup: 'rounded-xl text-xs' } });
             }
@@ -1650,7 +1693,7 @@
             cardsContainer.innerHTML = '';
             let rentedCount = 0, emptyCount = 0, totalRevenue = 0, expectedRevenue = 0;
 
-            const kw = (document.getElementById('admin-search-kw')?.value || '').trim().toLowerCase();
+            const kw = normalizeSearchText(document.getElementById('admin-search-kw')?.value || '');
             const filterStatus = document.getElementById('admin-filter-status')?.value || 'all';
 
             const btnAdd = document.getElementById('btn-add-room');
@@ -1673,11 +1716,13 @@
                 const details = getRoomTotalDetails(room);
                 if (room.status === "Đang thuê") {
                     rentedCount++;
-                    expectedRevenue += details.total;
-                    if (room.paymentStatus === "Đã thanh toán") totalRevenue += details.total;
+                    expectedRevenue += details.currentTotal;
+                    if (room.paymentStatus === "Đã thanh toán") totalRevenue += details.currentTotal;
                 } else emptyCount++;
 
-                const matchKw = room.name.toLowerCase().includes(kw) || (room.tenant && room.tenant.toLowerCase().includes(kw));
+                const roomName = normalizeSearchText(room.name);
+                const roomTenant = normalizeSearchText(room.tenant);
+                const matchKw = !kw || roomName.includes(kw) || roomTenant.includes(kw);
                 const matchStatus = filterStatus === 'all' ||
                     (filterStatus === 'paid' && room.paymentStatus === 'Đã thanh toán') ||
                     (filterStatus === 'unpaid' && room.paymentStatus !== 'Đã thanh toán');
@@ -1696,31 +1741,36 @@
                 }
 
                 const card = document.createElement('div');
-                card.className = "p-4 border border-slate-200 rounded-xl bg-white shadow-xs space-y-3";
+                card.className = `room-card ${room.status === 'Đang thuê' ? 'room-card--occupied' : 'room-card--empty'}`;
                 card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">${esc(room.name)}</h3>
-                            <p class="text-xs text-slate-500 mt-0.5">${room.status === 'Trống' ? 'Chưa có khách (0 người)' : `${esc(room.tenant || 'Chưa có khách')} (${Math.max(1, parseNum(room.occupants))} người) ${room.phone ? ' - ' + esc(room.phone) : ''}`}</p>
+                    <div class="room-card__header">
+                        <div class="min-w-0">
+                            <h3 class="room-card__title">${esc(room.name)}</h3>
+                            <p class="room-card__meta">${room.status === 'Trống' ? 'Chưa có khách (0 người)' : `${esc(room.tenant || 'Chưa có khách')} (${Math.max(1, parseNum(room.occupants))} người) ${room.phone ? ' - ' + esc(room.phone) : ''}`}</p>
                         </div>
-                        <span class="px-2.5 py-1 text-[11px] font-semibold rounded-md ${room.status === 'Đang thuê' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-600 border border-amber-100'}">${esc(room.status)}</span>
+                        <span class="room-card__status ${room.status === 'Đang thuê' ? 'room-card__status--active' : 'room-card__status--idle'}">${esc(room.status)}</span>
                     </div>
 
-                    ${alertBadge ? `<div class="flex flex-wrap gap-1">${alertBadge}</div>` : ''}
+                    ${alertBadge ? `<div class="room-card__alert-list">${alertBadge}</div>` : ''}
 
-                    ${room.note ? `<div class="bg-amber-50/60 p-2 rounded-lg text-xs text-amber-800 border border-amber-200 break-words"><i class="fa-solid fa-note-sticky mr-1"></i><strong>Ghi chú:</strong> ${esc(room.note)}</div>` : ''}
-                    ${details.debt > 0 ? `<div class="bg-rose-50 p-2 rounded-lg text-xs text-rose-700 border border-rose-200"><strong>Nợ kỳ trước:</strong> ${details.debt.toLocaleString('vi-VN')} đ</div>` : ''}
+                    ${room.note ? `<div class="room-card__note"><i class="fa-solid fa-note-sticky mr-1"></i><strong>Ghi chú:</strong> ${esc(room.note)}</div>` : ''}
+                    <div class="room-card__debt ${details.debt > 0 ? '' : 'opacity-60'}">
+                        <strong>Nợ tháng trước:</strong> ${details.debt.toLocaleString('vi-VN')} đ
+                    </div>
 
-                    <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                        <span class="text-xs font-semibold text-slate-600">Tổng phải trả:</span>
-                        <span class="text-sm font-bold text-indigo-600">${details.total.toLocaleString('vi-VN')} đ</span>
+                    <div class="room-card__total-row">
+                        <span>Tổng phải trả:</span>
+                        <span>${details.total.toLocaleString('vi-VN')} đ</span>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button onclick="togglePaymentStatus('${room.docId}', event)" class="py-2 text-xs font-semibold rounded-lg transition-all ${isPaid ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100'}">
+                    <div class="room-card__actions">
+                        <button onclick="togglePaymentStatus('${room.docId}', event)" class="room-card__button ${isPaid ? 'room-card__button--success' : 'room-card__button--danger'}">
                             ${isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
                         </button>
-                        <button onclick="openEditModal('${room.docId}')" class="bg-slate-800 text-white py-2 rounded-lg text-xs font-semibold hover:bg-slate-700 transition-all active:scale-95">
+                        <button onclick="clearPreviousDebt('${room.docId}', event)" class="room-card__button room-card__button--warning ${details.debt > 0 ? '' : 'opacity-50 cursor-not-allowed'}" ${details.debt > 0 ? '' : 'disabled'}>
+                            ${details.debt > 0 ? 'Xóa nợ' : 'Không nợ'}
+                        </button>
+                        <button onclick="openEditModal('${room.docId}')" class="room-card__button room-card__button--primary">
                             Sửa thông tin
                         </button>
                     </div>
@@ -1996,6 +2046,31 @@
             };
         }
 
+        function openSnapshotPreview(dataUrl, title = 'Xem trước ảnh backup') {
+            Swal.fire({
+                title,
+                html: `<div class="overflow-auto max-h-[70vh] rounded-xl border border-slate-200 bg-slate-50 p-2"><img src="${dataUrl}" alt="Snapshot" style="max-width:100%; width:100%; height:auto; border-radius:10px; display:block;" /></div>`,
+                showCloseButton: true,
+                showConfirmButton: true,
+                confirmButtonText: 'Tải xuống',
+                cancelButtonText: 'Đóng',
+                showCancelButton: true,
+                customClass: { popup: 'rounded-xl text-xs', confirmButton: 'bg-indigo-600 hover:bg-indigo-700 rounded-lg px-3', cancelButton: 'bg-slate-200 text-slate-700 rounded-lg px-3' },
+                buttonsStyling: false,
+                didOpen: () => {
+                    const confirmBtn = document.querySelector('.swal2-confirm');
+                    if (confirmBtn) {
+                        confirmBtn.onclick = () => {
+                            const link = document.createElement('a');
+                            link.href = dataUrl;
+                            link.download = `snapshot-${Date.now()}.png`;
+                            link.click();
+                        };
+                    }
+                }
+            });
+        }
+
         window.renderBackupSnapshotImage = async function (file) {
             if (!file) return;
             if (!file.name.toLowerCase().endsWith('.json')) {
@@ -2006,15 +2081,9 @@
                 const text = await file.text();
                 const payload = JSON.parse(text);
                 const canvas = buildSnapshotCanvasFromPayload(payload, file.name);
-                const blob = await new Promise((resolve, reject) => {
-                    canvas.toBlob((result) => {
-                        if (result) resolve(result);
-                        else reject(new Error('Không thể tạo ảnh PNG từ dữ liệu JSON.'));
-                    }, 'image/png');
-                });
-
-                downloadBlob(blob, `snapshot-phong-${Date.now()}.png`);
-                Toast.fire({ icon: 'success', title: 'Đã xuất ảnh tóm tắt dữ liệu phòng.' });
+                const dataUrl = canvas.toDataURL('image/png');
+                openSnapshotPreview(dataUrl, `Xem trước: ${file.name}`);
+                Toast.fire({ icon: 'success', title: 'Đã tạo ảnh xem trước trong web.' });
             } catch (error) {
                 notifyError(error, 'Xuất ảnh từ JSON thất bại');
             }
@@ -2028,14 +2097,9 @@
 
             try {
                 const canvas = buildSnapshotCanvasFromPayload(archive.data, archive.label || archive.id);
-                const blob = await new Promise((resolve, reject) => {
-                    canvas.toBlob((result) => {
-                        if (result) resolve(result);
-                        else reject(new Error('Không thể xuất ảnh backup lưu trữ.'));
-                    }, 'image/png');
-                });
-                downloadBlob(blob, `snapshot-${archive.monthKey || 'backup'}-${Date.now()}.png`);
-                Toast.fire({ icon: 'success', title: 'Đã xuất ảnh backup cũ.' });
+                const dataUrl = canvas.toDataURL('image/png');
+                openSnapshotPreview(dataUrl, `Snapshot: ${archive.monthKey || archive.label || 'backup cũ'}`);
+                Toast.fire({ icon: 'success', title: 'Đã hiển thị ảnh backup cũ trong web.' });
             } catch (error) {
                 notifyError(error, 'Xuất ảnh backup cũ thất bại');
             }
@@ -2294,6 +2358,7 @@
             document.getElementById('room-occupants').value = '0';
             document.getElementById('room-phone').value = '';
             document.getElementById('room-is-paid').value = 'Chưa thanh toán';
+            document.getElementById('room-previous-debt').value = '0';
             document.getElementById('room-price').value = '2,000,000';
             document.getElementById('elec-price').value = '4,000';
             document.getElementById('elec-old').value = '0';
@@ -2322,6 +2387,7 @@
             document.getElementById('room-occupants').value = room.occupants || 0;
             document.getElementById('room-phone').value = room.phone || '';
             document.getElementById('room-is-paid').value = room.paymentStatus || 'Chưa thanh toán';
+            document.getElementById('room-previous-debt').value = parseNum(room.previousMonthDebt ?? room.debt ?? 0).toLocaleString('en-US');
             document.getElementById('room-price').value = parseNum(room.price).toLocaleString('en-US');
             document.getElementById('elec-price').value = parseNum(room.elecPrice || 4000).toLocaleString('en-US');
             document.getElementById('elec-old').value = parseNum(room.elecOld).toLocaleString('en-US');
@@ -2393,6 +2459,11 @@
             if (waterNew < waterOld) {
                 return Swal.fire({ title: 'Chỉ số nước không hợp lệ', text: 'Số mới phải lớn hơn hoặc bằng số cũ.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             }
+            const existingRoom = roomsData.find(room => room.docId === currentEditingDocId);
+            const previousMonthDebt = status === 'Đang thuê'
+                ? Math.max(0, parseNum(document.getElementById('room-previous-debt').value || existingRoom?.previousMonthDebt || existingRoom?.debt || 0))
+                : 0;
+
             const roomData = {
                 name: name,
                 status: status,
@@ -2400,7 +2471,8 @@
                 occupants: status === 'Đang thuê' ? occupants : 0,
                 phone: status === 'Đang thuê' ? boundedText(document.getElementById('room-phone').value, 30) : '',
                 paymentStatus: document.getElementById('room-is-paid').value,
-                debt: status === 'Đang thuê' ? Math.max(0, parseNum(roomsData.find(room => room.docId === currentEditingDocId)?.debt)) : 0,
+                previousMonthDebt,
+                debt: previousMonthDebt,
                 price,
                 elecPrice,
                 elecOld,
@@ -2412,8 +2484,8 @@
                 waterPriceNormal,
                 service,
                 note: boundedText(document.getElementById('room-note').value),
-                debtHistory: Array.isArray(roomsData.find(room => room.docId === currentEditingDocId)?.debtHistory)
-                    ? roomsData.find(room => room.docId === currentEditingDocId).debtHistory.slice(-120) : []
+                debtHistory: Array.isArray(existingRoom?.debtHistory)
+                    ? existingRoom.debtHistory.slice(-120) : []
             };
             assertRecordSize(roomData);
 
@@ -2466,7 +2538,10 @@
                 showLoading();
                 const isPaid = room.paymentStatus === "Đã thanh toán";
                 room.paymentStatus = isPaid ? "Chưa thanh toán" : "Đã thanh toán";
-                if (!isPaid) room.debt = 0;
+                if (!isPaid) {
+                    room.previousMonthDebt = 0;
+                    room.debt = 0;
+                }
                 await set(ref(db, 'rooms/' + room.docId), room);
                 await loadAllData();
                 renderFilteredRooms();
@@ -2476,6 +2551,59 @@
                 }
                 hideLoading();
                 Toast.fire({ icon: 'success', title: 'Đã cập nhật trạng thái thanh toán!' });
+            });
+        };
+
+        window.clearPreviousDebt = async function (docId, evt) {
+            const btn = evt?.currentTarget || evt?.target;
+            const room = roomsData.find(r => r.docId === docId);
+            if (!room) return;
+
+            const debt = getRoomCommittedDebt(room);
+            if (debt <= 0) {
+                return Swal.fire({
+                    title: 'Không có nợ kỳ trước',
+                    text: `Phòng ${room.name} hiện không còn khoản nợ nào để xóa.`,
+                    icon: 'info',
+                    customClass: { popup: 'rounded-xl text-xs' }
+                });
+            }
+
+            const res = await Swal.fire({
+                title: 'Xóa nợ kỳ trước?',
+                text: `Bạn chắc chắn muốn xóa khoản nợ ${debt.toLocaleString('vi-VN')} đ của phòng ${room.name}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'Xóa nợ',
+                cancelButtonText: 'Hủy',
+                customClass: { popup: 'rounded-xl text-xs' }
+            });
+
+            if (!res.isConfirmed) return;
+
+            await executeWithLock(btn, async () => {
+                showLoading();
+                room.debt = 0;
+                room.debtHistory = Array.isArray(room.debtHistory) ? room.debtHistory : [];
+                room.debtHistory.push({
+                    month: currentMonthKey(),
+                    amount: 0,
+                    type: 'clear-debt',
+                    note: 'Xóa nợ kỳ trước',
+                    recordedAt: Date.now()
+                });
+                room.debtHistory = room.debtHistory.slice(-120);
+
+                await set(ref(db, 'rooms/' + room.docId), room);
+                await loadAllData();
+                renderFilteredRooms();
+                if (activeTenantRoom && activeTenantRoom.docId === room.docId) {
+                    activeTenantRoom = room;
+                    displayTenantInfo(room);
+                }
+                hideLoading();
+                Toast.fire({ icon: 'success', title: 'Đã xóa nợ kỳ trước!' });
             });
         };
 
