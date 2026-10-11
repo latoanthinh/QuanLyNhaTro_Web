@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Nhà Trọ Thông Minh</title>
+    <title>Hệ Thống Quản Lý Nhà Trọ</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -112,10 +112,34 @@
             border: none !important;
             box-shadow: none !important;
         }
+
+        .sidebar-nav-active {
+            background: #087e72;
+            color: #fff;
+            box-shadow: inset 3px 0 #8ce1c7;
+        }
+
+        .sidebar-nav-idle {
+            color: #cbd5d3;
+        }
+
+        .sidebar-nav-idle:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 
-<body class="bg-slate-50 font-sans min-h-screen pb-12 overflow-x-hidden text-slate-800">
+<body class="bg-slate-50 font-sans min-h-screen overflow-x-hidden text-slate-800">
 
     <!-- Loading Overlay -->
     <div id="global-loading"
@@ -127,30 +151,79 @@
         </div>
     </div>
 
-    <!-- Header -->
-    <header class="bg-slate-900 text-white shadow-sm sticky top-0 z-40 border-b border-slate-800">
-        <div
-            class="container mx-auto px-4 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3 max-w-6xl">
-            <h1 class="text-base sm:text-lg font-bold text-center sm:text-left truncate w-full sm:w-auto tracking-wide">
-                <i class="fa-solid fa-building-user mr-2 text-indigo-400"></i> Quản Lý Nhà Trọ Thông Minh
-            </h1>
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
-                <button onclick="switchView('tenant')" id="btn-view-tenant"
-                    class="flex-1 sm:flex-none text-xs bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold shadow-xs transition-all active:scale-95">
-                    <i class="fa-solid fa-user-tag mr-1.5"></i> Cổng Khách
+    <section id="admin-login" class="min-h-screen flex items-center justify-center p-5 bg-[#edf2f0]">
+        <div class="w-full max-w-md bg-white border border-slate-200 rounded-xl shadow-lg shadow-slate-900/5 p-7 sm:p-9">
+            <div class="w-12 h-12 rounded-lg bg-[#173a36] text-emerald-100 flex items-center justify-center text-xl mb-6">
+                <i class="fa-solid fa-building-user"></i>
+            </div>
+            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700 mb-2">HỆ THỐNG QUẢN TRỊ</p>
+            <h1 class="text-2xl font-bold text-slate-900">Quản lý nhà trọ</h1>
+            <p class="text-sm text-slate-500 mt-2 mb-7">Đăng nhập để quản lý phòng, doanh thu và các yêu cầu từ khách thuê.</p>
+            <button onclick="toggleAdminMode()" class="w-full flex items-center justify-center gap-2 bg-[#087e72] hover:bg-[#066b62] text-white px-4 py-3 rounded-lg text-sm font-semibold transition-colors">
+                <i class="fa-solid fa-lock"></i> Đăng nhập quản trị
+            </button>
+            <p class="text-[11px] text-slate-400 mt-5 text-center">Khu vực dành riêng cho chủ trọ</p>
+        </div>
+    </section>
+
+    <div id="admin-shell" class="hidden min-h-screen bg-[#f3f6f5]">
+        <button id="admin-sidebar-backdrop" onclick="toggleAdminSidebar(false)" aria-label="Đóng menu"
+            class="fixed inset-0 z-40 hidden bg-slate-950/50 lg:hidden"></button>
+
+        <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col bg-[#173a36] text-white shadow-xl transition-transform duration-200 lg:translate-x-0">
+            <div class="flex items-center gap-3 border-b border-white/10 px-5 py-5">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-400/15 text-emerald-200">
+                    <i class="fa-solid fa-building-user"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Nhà Trọ</p>
+                    <p class="text-[10px] text-emerald-100/60">BẢNG ĐIỀU KHIỂN</p>
+                </div>
+            </div>
+
+            <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-5" aria-label="Điều hướng quản trị">
+                <p class="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-100/50">Quản lý</p>
+                <button onclick="switchAdminTab('tab-overview')" id="nav-tab-overview" aria-current="page" class="admin-tab-btn sidebar-nav-active flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-xs font-semibold transition-colors">
+                    <i class="fa-solid fa-chart-pie w-4 text-center"></i> Tổng quan
                 </button>
-                <button onclick="toggleAdminMode()" id="btn-view-admin"
-                    class="flex-1 sm:flex-none text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg font-semibold border border-slate-700 transition-all active:scale-95">
-                    <i class="fa-solid fa-user-shield mr-1.5 text-indigo-400"></i> Chủ Trọ
+                <button onclick="switchAdminTab('tab-rooms')" id="nav-tab-rooms" class="admin-tab-btn sidebar-nav-idle flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-xs font-semibold transition-colors">
+                    <i class="fa-solid fa-door-open w-4 text-center"></i> Quản lý phòng
+                </button>
+                <button onclick="switchAdminTab('tab-invoices')" id="nav-tab-invoices" class="admin-tab-btn sidebar-nav-idle flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-xs font-semibold transition-colors">
+                    <i class="fa-solid fa-receipt w-4 text-center"></i> Lịch sử hóa đơn
+                </button>
+
+            </nav>
+
+            <div class="border-t border-white/10 p-3">
+                <div class="mb-3 flex items-center gap-2.5 px-2 py-2">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-[#173a36]">CT</div>
+                    <div>
+                        <p class="text-xs font-semibold">Chủ trọ</p>
+                        <p class="text-[10px] text-emerald-100/60">Quản trị viên</p>
+                    </div>
+                </div>
+                <button onclick="logoutAdmin()" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-rose-200 transition-colors hover:bg-rose-400/10">
+                    <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i> Đăng xuất
                 </button>
             </div>
-        </div>
-    </header>
+        </aside>
 
-    <main class="container mx-auto px-3.5 py-6 max-w-5xl">
+        <div class="min-h-screen lg:ml-64">
+            <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:hidden">
+                <button onclick="toggleAdminSidebar()" aria-label="Mở menu" class="flex h-9 w-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <span id="admin-mobile-title" class="text-xs font-bold text-slate-800">Quản lý nhà trọ</span>
+                <button onclick="logoutAdmin()" aria-label="Đăng xuất" title="Đăng xuất" class="flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </button>
+            </header>
+
+    <main class="mx-auto w-full max-w-[1440px] px-4 py-5 sm:px-6 sm:py-7">
 
         <!-- CỔNG KHÁCH THUÊ -->
-        <div id="view-tenant" class="space-y-5 max-w-lg mx-auto">
+        <div id="view-tenant" class="hidden space-y-5 max-w-lg mx-auto">
             <div
                 class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-2xl p-5 text-white shadow-md text-center break-words border border-slate-800">
                 <h2 class="text-lg font-bold mb-1 tracking-tight">Tra Cứu Hóa Đơn & QR Pay</h2>
@@ -239,39 +312,16 @@
         </div>
 
         <!-- GIAO DIỆN QUẢN LÝ CHỦ TRỌ -->
-        <div id="view-admin" class="hidden space-y-5">
-            <div class="bg-white rounded-xl shadow-xs p-1.5 overflow-x-auto flex gap-1.5 border border-slate-200">
-                <button onclick="switchAdminTab('tab-overview')" id="nav-tab-overview"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-indigo-600 text-white flex items-center gap-1.5 shrink-0 transition-all">
-                    <i class="fa-solid fa-chart-pie"></i> Tổng Quan
-                </button>
-                <button onclick="switchAdminTab('tab-rooms')" id="nav-tab-rooms"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 shrink-0 transition-all">
-                    <i class="fa-solid fa-door-open"></i> Quản Lý Phòng
-                </button>
-                <button onclick="switchAdminTab('tab-invoices')" id="nav-tab-invoices"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 shrink-0 transition-all">
-                    <i class="fa-solid fa-receipt"></i> Lịch Sử HĐ
-                </button>
-                <button onclick="switchAdminTab('tab-payment-requests')" id="nav-tab-payment-requests"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 shrink-0 relative transition-all">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> Yêu Cầu HĐ <span id="badge-payment-requests"
-                        class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-                </button>
-                <button onclick="switchAdminTab('tab-issues')" id="nav-tab-issues"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 shrink-0 relative transition-all">
-                    <i class="fa-solid fa-screwdriver-wrench"></i> Sự Cố <span id="badge-issues"
-                        class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-                </button>
-                <button onclick="switchAdminTab('tab-chats')" id="nav-tab-chats"
-                    class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-1.5 shrink-0 relative transition-all">
-                    <i class="fa-solid fa-comments"></i> Nhắn Tin <span id="badge-chats"
-                        class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-                </button>
-                <button onclick="logoutAdmin()"
-                    class="py-2.5 px-3 text-xs font-semibold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center gap-1 shrink-0 ml-auto transition-all">
-                    <i class="fa-solid fa-lock"></i> Khóa
-                </button>
+        <div id="view-admin" class="space-y-5">
+            <div class="flex items-end justify-between gap-3 border-b border-slate-200 pb-4">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700">Không gian quản trị</p>
+                    <h1 id="admin-page-title" class="mt-1 text-xl font-bold text-slate-900">Tổng quan</h1>
+                    <p id="admin-page-description" class="mt-1 text-xs text-slate-500">Theo dõi hoạt động và tình hình kinh doanh nhà trọ.</p>
+                </div>
+                <span class="hidden items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[10px] font-semibold text-emerald-700 sm:flex">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Đang hoạt động
+                </span>
             </div>
 
             <!-- TAB 1: TỔNG QUAN -->
@@ -370,7 +420,7 @@
                             Danh Sách Phòng (<span id="room-count-badge">0</span>/12)
                         </h2>
                         <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-                            <button onclick="promptNextMonth(event)"
+                            <button id="btn-close-month" onclick="promptNextMonth(event)"
                                 class="text-[11px] bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1">
                                 <i class="fa-solid fa-calendar-plus"></i> Chốt Tháng Mới
                             </button>
@@ -404,71 +454,19 @@
             <!-- TAB 3: LỊCH SỬ HÓA ĐƠN -->
             <div id="tab-invoices" class="admin-tab-content hidden space-y-4">
                 <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <div class="border-b border-slate-100 pb-2">
                         <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
                                 class="fa-solid fa-database mr-2 text-indigo-600"></i> Tra Cứu Phiếu Tính Tiền Đã In
                         </h2>
-                        <button onclick="clearAllInvoices(event)"
-                            class="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg font-semibold transition-all">
-                            <i class="fa-solid fa-trash-can mr-1"></i> Xóa tất cả lịch sử
-                        </button>
                     </div>
                     <div id="invoice-history-cards" class="space-y-2.5"></div>
                 </section>
             </div>
 
-            <!-- TAB 4: YÊU CẦU XUẤT HÓA ĐƠN -->
-            <div id="tab-payment-requests" class="admin-tab-content hidden space-y-4">
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                    <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                            class="fa-solid fa-file-invoice-dollar mr-2 text-indigo-600"></i> Yêu Cầu Xuất Hóa Đơn Từ
-                        Khách</h2>
-                    <p class="text-[11px] text-slate-500">Khách chỉ được in hóa đơn sau khi Chủ Trọ xác nhận đã nhận
-                        tiền.</p>
-                    <div id="payment-requests-container" class="space-y-2.5"></div>
-                </section>
-            </div>
-
-            <!-- TAB 5: SỰ CỐ -->
-            <div id="tab-issues" class="admin-tab-content hidden space-y-4">
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                    <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                            class="fa-solid fa-screwdriver-wrench mr-2 text-indigo-600"></i> Báo Cố Từ Khách</h2>
-                    <div id="admin-issues-container" class="space-y-2.5"></div>
-                </section>
-            </div>
-
-            <!-- TAB 6: NHẮN TIN (QUẢN TRỊ) -->
-            <div id="tab-chats" class="admin-tab-content hidden space-y-4">
-                <section class="bg-white rounded-xl shadow-xs border border-slate-200 p-4 space-y-3">
-                    <div
-                        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-2">
-                        <div>
-                            <h2 class="text-sm sm:text-base font-bold text-slate-800"><i
-                                    class="fa-solid fa-comments mr-2 text-indigo-600"></i> Trung Tâm Nhắn Tin Khách Thuê
-                            </h2>
-                            <p class="text-[11px] text-slate-500">Trao đổi trực tiếp với từng phòng. Tin nhắn tự động
-                                được lưu trữ.</p>
-                        </div>
-                        <button onclick="clearAllChatsDatabase(event)"
-                            class="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg font-semibold transition-all shrink-0">
-                            <i class="fa-solid fa-trash-can mr-1"></i> Làm sạch CSDL Tin Nhắn
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                        <div class="border border-slate-200 rounded-xl p-2 space-y-1 bg-slate-50/50 max-h-[500px] overflow-y-auto"
-                            id="admin-chat-room-list">
-                        </div>
-                        <div class="md:col-span-2 border border-slate-200 rounded-xl p-3 flex flex-col h-[500px] bg-white"
-                            id="admin-chat-box-container">
-                            <div class="text-center text-slate-400 my-auto text-xs">Vui lòng chọn một phòng bên trái để
-                                bắt đầu nhắn tin.</div>
-                        </div>
-                    </div>
-                </section>
-            </div>
         </div>
     </main>
+        </div>
+    </div>
 
     <!-- Hidden Print Area -->
     <div id="printArea" class="hidden">
@@ -806,7 +804,16 @@
 
             try {
                 await asyncFn();
+            } catch (error) {
+                console.error(error);
+                await Swal.fire({
+                    title: 'Không thể hoàn tất thao tác',
+                    text: 'Đã xảy ra lỗi khi lưu dữ liệu. Vui lòng kiểm tra kết nối và thử lại.',
+                    icon: 'error',
+                    customClass: { popup: 'rounded-xl text-xs' }
+                });
             } finally {
+                hideLoading();
                 if (btnElement) {
                     delete btnElement.dataset.processing;
                     btnElement.classList.remove("pointer-events-none", "opacity-50");
@@ -861,33 +868,54 @@
             });
         };
 
-        window.switchView = function (view) {
-            if (view === 'tenant') {
-                document.getElementById('view-tenant').classList.remove('hidden');
-                document.getElementById('view-admin').classList.add('hidden');
-            }
-        };
-
         window.switchAdminTab = function (tabId) {
+            const pageTitles = {
+                'tab-overview': 'Tổng quan',
+                'tab-rooms': 'Quản lý phòng',
+                'tab-invoices': 'Lịch sử hóa đơn'
+            };
+            if (!pageTitles[tabId]) return;
+
             document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-600', 'text-white');
-                btn.classList.add('bg-slate-50', 'text-slate-600');
+                btn.classList.remove('sidebar-nav-active');
+                btn.classList.add('sidebar-nav-idle');
+                btn.removeAttribute('aria-current');
             });
 
             document.getElementById(tabId).classList.remove('hidden');
 
             const activeBtn = document.getElementById('nav-' + tabId);
             if (activeBtn) {
-                activeBtn.classList.remove('bg-slate-50', 'text-slate-600');
-                activeBtn.classList.add('bg-indigo-600', 'text-white');
+                activeBtn.classList.remove('sidebar-nav-idle');
+                activeBtn.classList.add('sidebar-nav-active');
+                activeBtn.setAttribute('aria-current', 'page');
             }
+
+            const pageDescriptions = {
+                'tab-overview': 'Theo dõi hoạt động và tình hình kinh doanh nhà trọ.',
+                'tab-rooms': 'Quản lý trạng thái thuê, hóa đơn và chỉ số từng phòng.',
+                'tab-invoices': 'Tra cứu các phiếu tính tiền đã in.'
+            };
+            document.getElementById('admin-page-title').innerText = pageTitles[tabId] || 'Quản trị';
+            document.getElementById('admin-page-description').innerText = pageDescriptions[tabId] || '';
+            document.getElementById('admin-mobile-title').innerText = pageTitles[tabId] || 'Quản trị';
+            toggleAdminSidebar(false);
 
             if (tabId === 'tab-overview') renderOverviewAnalytics();
             if (tabId === 'tab-invoices') renderInvoiceHistory();
-            if (tabId === 'tab-payment-requests') renderPaymentRequests();
-            if (tabId === 'tab-issues') renderAdminIssues();
-            if (tabId === 'tab-chats') renderAdminChatRoomList();
+        };
+
+        window.toggleAdminSidebar = function (open = null) {
+            const sidebar = document.getElementById('admin-sidebar');
+            const backdrop = document.getElementById('admin-sidebar-backdrop');
+            const shouldOpen = open === null
+                ? sidebar.classList.contains('-translate-x-full')
+                : open;
+
+            sidebar.classList.toggle('-translate-x-full', !shouldOpen);
+            backdrop.classList.toggle('hidden', !shouldOpen);
+            document.body.classList.toggle('overflow-hidden', shouldOpen);
         };
 
         window.toggleAdminMode = function () {
@@ -915,6 +943,8 @@
         };
 
         function showAdminView() {
+            document.getElementById('admin-login').classList.add('hidden');
+            document.getElementById('admin-shell').classList.remove('hidden');
             document.getElementById('view-admin').classList.remove('hidden');
             document.getElementById('view-tenant').classList.add('hidden');
             loadRoomsAdmin();
@@ -922,7 +952,9 @@
 
         window.logoutAdmin = function () {
             sessionStorage.removeItem("isAdminLoggedIn");
-            switchView('tenant');
+            document.getElementById('admin-shell').classList.add('hidden');
+            document.getElementById('admin-login').classList.remove('hidden');
+            document.body.classList.remove('overflow-hidden');
         };
 
         function calculateWater(room) {
@@ -997,6 +1029,17 @@
             };
         }
 
+        function isBillableRoom(room) {
+            return room?.status === 'Đang thuê' &&
+                Boolean(String(room.tenant || '').trim()) &&
+                parseNum(room.occupants) > 0;
+        }
+
+        function getCurrentBillingPeriod() {
+            const now = new Date();
+            return `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+        }
+
         function parseMonthFromDateStr(dateStr) {
             if (!dateStr) return null;
             let parts = dateStr.split(' ');
@@ -1013,19 +1056,24 @@
 
         function getMonthlyRevenueData() {
             const monthlyData = {};
+            const now = new Date();
+            const currentMonthKey = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            const countedRooms = new Set();
 
             invoicesData.forEach(inv => {
                 if (inv.status === 'Đã thanh toán') {
                     const mKey = parseMonthFromDateStr(inv.createdDate);
-                    if (mKey) {
+                    if (mKey && mKey !== currentMonthKey) {
+                        const roomKey = inv.roomDocId || `${inv.roomName || ''}|${inv.tenantName || ''}`;
+                        const invoiceKey = `${mKey}|${roomKey}`;
+                        if (countedRooms.has(invoiceKey)) return;
+                        countedRooms.add(invoiceKey);
                         if (!monthlyData[mKey]) monthlyData[mKey] = { expected: 0, paid: 0 };
                         monthlyData[mKey].paid += parseNum(inv.total);
                     }
                 }
             });
 
-            const now = new Date();
-            const currentMonthKey = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
             if (!monthlyData[currentMonthKey]) monthlyData[currentMonthKey] = { expected: 0, paid: 0 };
 
             roomsData.forEach(room => {
@@ -1223,44 +1271,12 @@
                     sortRooms(roomsData);
                 }
 
-                const issuesSnap = await get(child(dbRef, "issues"));
-                issuesData = [];
-                if (issuesSnap.exists()) {
-                    const data = issuesSnap.val();
-                    Object.keys(data).forEach(k => issuesData.push({ id: k, ...data[k] }));
-                }
-                updateIssueBadge();
-
                 const invoicesSnap = await get(child(dbRef, "invoices"));
                 invoicesData = [];
                 if (invoicesSnap.exists()) {
                     const data = invoicesSnap.val();
                     Object.keys(data).forEach(k => invoicesData.push({ id: k, ...data[k] }));
                 }
-
-                const requestSnap = await get(child(dbRef, "invoiceRequests"));
-                paymentRequestsData = [];
-                if (requestSnap.exists()) {
-                    const data = requestSnap.val();
-                    Object.keys(data).forEach(k => paymentRequestsData.push({ id: k, ...data[k] }));
-                }
-                updatePaymentRequestBadge();
-
-                const chatSnap = await get(child(dbRef, "chats"));
-                chatsData = {};
-                if (chatSnap.exists()) {
-                    const rawChats = chatSnap.val();
-                    Object.keys(rawChats).forEach(roomDocId => {
-                        chatsData[roomDocId] = [];
-                        const roomMsgs = rawChats[roomDocId];
-                        Object.keys(roomMsgs).forEach(msgId => {
-                            const msg = roomMsgs[msgId];
-                            chatsData[roomDocId].push({ id: msgId, ...msg });
-                        });
-                        chatsData[roomDocId].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-                    });
-                }
-                updateChatBadge();
 
                 renderOverviewAnalytics();
             } catch (err) { console.error(err); }
@@ -1368,9 +1384,16 @@
 
             const actionBtn = document.getElementById('tenant-invoice-action');
             if (activeInvoiceRequest?.status === 'approved' && isPaid) {
-                actionBtn.innerHTML = '<i class="fa-solid fa-print"></i> In Hóa Đơn';
-                actionBtn.onclick = (e) => printInvoice(e);
-                actionBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold py-2.5 px-2 rounded-lg shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95';
+                // Kiểm tra xem hóa đơn này đã được in lần nào chưa
+                if (activeInvoiceRequest.isPrinted) {
+                    actionBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> Đã in hóa đơn';
+                    actionBtn.onclick = null;
+                    actionBtn.className = 'bg-slate-400 text-white text-[11px] font-semibold py-2.5 px-2 rounded-lg shadow-xs flex items-center justify-center gap-1 cursor-not-allowed';
+                } else {
+                    actionBtn.innerHTML = '<i class="fa-solid fa-print"></i> In Hóa Đơn';
+                    actionBtn.onclick = (e) => printInvoice(e);
+                    actionBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold py-2.5 px-2 rounded-lg shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95';
+                }
             } else if (activeInvoiceRequest?.status === 'pending') {
                 actionBtn.innerHTML = '<i class="fa-solid fa-clock"></i> Chờ Admin';
                 actionBtn.onclick = (e) => requestInvoice(e);
@@ -1674,6 +1697,26 @@
             });
         };
 
+        // Hàm thực thi lệnh in trực tiếp hóa đơn
+        function triggerPrintWindow(room, details) {
+            document.getElementById('print-date').innerText = 'Ngày lập: ' + new Date().toLocaleDateString('vi-VN');
+            document.getElementById('p-room').innerText = room.name;
+            document.getElementById('p-tenant').innerText = room.tenant || '---';
+            document.getElementById('p-occupants').innerText = room.occupants || 1;
+            document.getElementById('p-price').innerText = details.price.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-elec-qty').innerText = details.elecQty;
+            document.getElementById('p-elec').innerText = details.elecTotal.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-water').innerText = details.waterTotal.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-water-desc').innerText = `(${details.waterQtyDesc})`;
+            document.getElementById('p-service').innerText = details.service.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-total').innerText = details.total.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('p-status').innerText = room.paymentStatus || 'Chưa thanh toán';
+
+            setTimeout(() => {
+                window.print();
+            }, 200);
+        }
+
         window.printInvoice = async function (evt) {
             if (!activeTenantRoom) return;
             const btn = evt?.currentTarget || evt?.target;
@@ -1697,20 +1740,50 @@
                 return Swal.fire({ title: 'Chưa được phép in', text: 'Khách phải thanh toán trước và Chủ Trọ phải xác nhận yêu cầu xuất hóa đơn.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             }
 
+            if (request.isPrinted) {
+                return Swal.fire({ title: 'Không thể in lại', text: 'Hóa đơn này đã được in 1 lần duy nhất. Chỉ Admin mới có quyền in lại.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+
             const details = getRoomTotalDetails(room);
 
-            document.getElementById('print-date').innerText = 'Ngày lập: ' + new Date().toLocaleDateString('vi-VN');
-            document.getElementById('p-room').innerText = room.name;
-            document.getElementById('p-tenant').innerText = room.tenant || '---';
-            document.getElementById('p-occupants').innerText = room.occupants || 1;
-            document.getElementById('p-price').innerText = details.price.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('p-elec-qty').innerText = details.elecQty;
-            document.getElementById('p-elec').innerText = details.elecTotal.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('p-water').innerText = details.waterTotal.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('p-water-desc').innerText = `(${details.waterQtyDesc})`;
-            document.getElementById('p-service').innerText = details.service.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('p-total').innerText = details.total.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('p-status').innerText = room.paymentStatus || 'Chưa thanh toán';
+            await executeWithLock(btn, async () => {
+                showLoading();
+
+                // Đánh dấu yêu cầu xuất hóa đơn này đã được in
+                request.isPrinted = true;
+                await set(ref(db, 'invoiceRequests/' + request.id), request);
+
+                // Lưu phiếu tính tiền vào lịch sử
+                const invoiceId = 'inv_' + Date.now();
+                const invoiceData = {
+                    id: invoiceId,
+                    roomDocId: room.docId,
+                    roomName: room.name,
+                    tenantName: room.tenant || 'Chưa cập nhật',
+                    total: details.total,
+                    status: room.paymentStatus || 'Chưa thanh toán',
+                    createdDate: new Date().toLocaleString('vi-VN')
+                };
+                await set(ref(db, 'invoices/' + invoiceId), invoiceData);
+
+                await loadAllData();
+                displayTenantInfo(room);
+                hideLoading();
+
+                triggerPrintWindow(room, details);
+            });
+        };
+
+        // Chức năng Admin in lại hóa đơn
+        window.adminReprintInvoice = async function (roomDocId, evt) {
+            const btn = evt?.currentTarget || evt?.target;
+            const room = roomsData.find(r => r.docId === roomDocId);
+            if (!room) return;
+            if (!isBillableRoom(room)) {
+                return Swal.fire({ title: 'Không thể lập hóa đơn', text: 'Chỉ phòng đang có khách thuê mới phát sinh hóa đơn.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+
+            const details = getRoomTotalDetails(room);
 
             await executeWithLock(btn, async () => {
                 showLoading();
@@ -1721,14 +1794,13 @@
                     tenantName: room.tenant || 'Chưa cập nhật',
                     total: details.total,
                     status: room.paymentStatus || 'Chưa thanh toán',
-                    createdDate: new Date().toLocaleString('vi-VN')
+                    createdDate: new Date().toLocaleString('vi-VN') + ' (Admin in lại)'
                 };
                 await set(ref(db, 'invoices/' + invoiceId), invoiceData);
+                await loadAllData();
                 hideLoading();
 
-                setTimeout(() => {
-                    window.print();
-                }, 200);
+                triggerPrintWindow(room, details);
             });
         };
 
@@ -1742,12 +1814,7 @@
                 <div class="p-3 border border-slate-200 rounded-xl bg-slate-50/50 space-y-1.5 text-xs">
                     <div class="flex justify-between items-center">
                         <span class="font-bold text-slate-800">${inv.roomName} - ${inv.tenantName}</span>
-                        <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded ${inv.status === 'Đã thanh toán' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}">${inv.status}</span>
-                            <button onclick="deleteSingleInvoice('${inv.id}', event)" class="text-rose-500 hover:text-rose-700 p-1">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
+                        <span class="px-2 py-0.5 text-[10px] font-semibold rounded ${inv.status === 'Đã thanh toán' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}">${inv.status}</span>
                     </div>
                     <div class="flex justify-between items-center text-slate-500">
                         <span>Ngày tạo: ${inv.createdDate}</span>
@@ -1756,58 +1823,6 @@
                 </div>
             `).join('');
         }
-
-        window.deleteSingleInvoice = async function (id, evt) {
-            const btn = evt?.currentTarget || evt?.target;
-            const res = await Swal.fire({
-                title: 'Xóa lịch sử hóa đơn?',
-                text: 'Hóa đơn này sẽ bị xóa khỏi lịch sử lưu trữ.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#e11d48',
-                confirmButtonText: 'Xóa',
-                cancelButtonText: 'Hủy',
-                customClass: { popup: 'rounded-xl text-xs' }
-            });
-
-            if (res.isConfirmed) {
-                await executeWithLock(btn, async () => {
-                    showLoading();
-                    await remove(ref(db, 'invoices/' + id));
-                    await loadAllData();
-                    renderInvoiceHistory();
-                    hideLoading();
-                    Toast.fire({ icon: 'success', title: 'Đã xóa hóa đơn!' });
-                });
-            }
-        };
-
-        window.clearAllInvoices = async function (evt) {
-            const btn = evt?.currentTarget || evt?.target;
-            if (invoicesData.length === 0) return Swal.fire({ title: 'Thông báo', text: 'Không có hóa đơn nào để xóa!', icon: 'info', customClass: { popup: 'rounded-xl text-xs' } });
-
-            const res = await Swal.fire({
-                title: 'Xóa toàn bộ lịch sử?',
-                text: 'Tất cả các phiếu tính tiền đã lưu sẽ bị xóa vĩnh viễn!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#e11d48',
-                confirmButtonText: 'Xóa tất cả',
-                cancelButtonText: 'Hủy',
-                customClass: { popup: 'rounded-xl text-xs' }
-            });
-
-            if (res.isConfirmed) {
-                await executeWithLock(btn, async () => {
-                    showLoading();
-                    await remove(ref(db, 'invoices'));
-                    await loadAllData();
-                    renderInvoiceHistory();
-                    hideLoading();
-                    Toast.fire({ icon: 'success', title: 'Đã xóa toàn bộ lịch sử hóa đơn!' });
-                });
-            }
-        };
 
         function updatePaymentRequestBadge() {
             const pending = paymentRequestsData.filter(r => r.status === 'pending').length;
@@ -1876,6 +1891,7 @@
                 await set(ref(db, 'rooms/' + room.docId), room);
 
                 request.status = 'approved';
+                request.isPrinted = false; // Reset trạng thái chưa in cho lượt phê duyệt mới
                 request.approvedAt = Date.now();
                 request.approvedDate = new Date().toLocaleString('vi-VN');
                 await set(ref(db, 'invoiceRequests/' + request.id), request);
@@ -1994,7 +2010,20 @@
 
             const btnAdd = document.getElementById('btn-add-room');
             const roomCountBadge = document.getElementById('room-count-badge');
+            const closeMonthButton = document.getElementById('btn-close-month');
+            const currentPeriod = getCurrentBillingPeriod();
+            const periodClosed = roomsData.some(room => room.lastClosedPeriod === currentPeriod);
             if (roomCountBadge) roomCountBadge.innerText = roomsData.length;
+
+            if (closeMonthButton) {
+                closeMonthButton.disabled = periodClosed || roomsData.length === 0;
+                closeMonthButton.title = periodClosed ? 'Kỳ này đã được chốt' : '';
+                closeMonthButton.innerHTML = periodClosed
+                    ? '<i class="fa-solid fa-circle-check"></i> Đã Chốt Kỳ Này'
+                    : '<i class="fa-solid fa-calendar-plus"></i> Chốt Tháng Mới';
+                closeMonthButton.classList.toggle('opacity-50', closeMonthButton.disabled);
+                closeMonthButton.classList.toggle('cursor-not-allowed', closeMonthButton.disabled);
+            }
 
             if (roomsData.length >= MAX_ROOMS) {
                 if (btnAdd) {
@@ -2024,6 +2053,7 @@
                 if (!matchKw || !matchStatus) return;
 
                 const isPaid = room.paymentStatus === "Đã thanh toán";
+                const canBill = isBillableRoom(room);
 
                 let alertBadge = '';
                 if (details.elecQty > 200) {
@@ -2054,11 +2084,14 @@
                         <span class="text-sm font-bold text-indigo-600">${details.total.toLocaleString('vi-VN')} đ</span>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button onclick="togglePaymentStatus('${room.docId}', event)" class="py-2 text-xs font-semibold rounded-lg transition-all ${isPaid ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100'}">
-                            ${isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                    <div class="grid grid-cols-3 gap-1.5 pt-1">
+                        <button ${canBill ? '' : 'disabled'} onclick="togglePaymentStatus('${room.docId}', event)" title="${canBill ? 'Cập nhật thanh toán' : 'Phòng chưa có khách thuê'}" class="py-2 text-[11px] font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isPaid ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100'}">
+                            ${canBill ? (isPaid ? 'Đã thanh toán' : 'Chưa thanh toán') : 'Chưa có khách'}
                         </button>
-                        <button onclick="openEditModal('${room.docId}')" class="bg-slate-800 text-white py-2 rounded-lg text-xs font-semibold hover:bg-slate-700 transition-all active:scale-95">
+                        <button ${canBill ? '' : 'disabled'} onclick="adminReprintInvoice('${room.docId}', event)" title="${canBill ? 'In hóa đơn' : 'Phòng chưa có khách thuê'}" class="bg-blue-600 text-white py-2 rounded-lg text-[11px] font-semibold hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-print"></i> ${canBill ? 'In hóa đơn' : 'Không có khách'}
+                        </button>
+                        <button onclick="openEditModal('${room.docId}')" class="bg-slate-800 text-white py-2 rounded-lg text-[11px] font-semibold hover:bg-slate-700 transition-all active:scale-95">
                             Sửa thông tin
                         </button>
                     </div>
@@ -2075,9 +2108,16 @@
 
         window.promptNextMonth = function (evt) {
             const btn = evt?.currentTarget || evt?.target;
+            if (roomsData.length === 0) {
+                return Swal.fire({ title: 'Chưa có phòng', text: 'Thêm phòng trước khi chốt kỳ thu tiền.', icon: 'info', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            const period = getCurrentBillingPeriod();
+            if (roomsData.some(room => room.lastClosedPeriod === period)) {
+                return Swal.fire({ title: 'Kỳ đã chốt', text: `Kỳ ${period} đã được chốt. Mỗi kỳ chỉ được chốt một lần.`, icon: 'info', customClass: { popup: 'rounded-xl text-xs' } });
+            }
             Swal.fire({
-                title: 'Chốt sổ & Chuyển tháng mới?',
-                text: 'Hệ thống sẽ lưu số liệu, tự động chuyển Chỉ số Mới thành Chỉ số Cũ vào CSDL, và đặt lại trạng thái chưa thanh toán.',
+                title: `Chốt kỳ ${period}?`,
+                text: 'Chỉ số mới sẽ thành chỉ số đầu kỳ kế tiếp và trạng thái thanh toán được đặt lại.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#4f46e5',
@@ -2088,16 +2128,23 @@
                 if (res.isConfirmed) {
                     await executeWithLock(btn, async () => {
                         showLoading();
-                        for (let r of roomsData) {
-                            r.elecOld = r.elecNew || r.elecOld;
-                            r.waterOld = r.waterNew || r.waterOld;
-                            r.paymentStatus = "Chưa thanh toán";
-                            await set(ref(db, 'rooms/' + r.docId), r);
-                        }
+                        const updates = {};
+                        roomsData.forEach(room => {
+                            const roomData = { ...room };
+                            delete roomData.docId;
+                            updates[`rooms/${room.docId}`] = {
+                                ...roomData,
+                                elecOld: parseNum(room.elecNew),
+                                waterOld: parseNum(room.waterNew),
+                                paymentStatus: 'Chưa thanh toán',
+                                lastClosedPeriod: period
+                            };
+                        });
+                        await update(ref(db), updates);
                         await loadAllData();
                         renderFilteredRooms();
                         hideLoading();
-                        Swal.fire({ title: 'Thành công', text: 'Đã chốt tháng mới và cập nhật dữ liệu vào CSDL!', icon: 'success', customClass: { popup: 'rounded-xl text-xs' } });
+                        Swal.fire({ title: 'Thành công', text: `Đã chốt kỳ ${period}.`, icon: 'success', customClass: { popup: 'rounded-xl text-xs' } });
                     });
                 }
             });
@@ -2133,7 +2180,7 @@
             document.getElementById('room-occupants').value = '0';
             document.getElementById('room-phone').value = '';
             document.getElementById('room-is-paid').value = 'Chưa thanh toán';
-            document.getElementById('room-price').value = '2,000,000';
+            document.getElementById('room-price').value = '1,500,000';
             document.getElementById('elec-price').value = '4,000';
             document.getElementById('elec-old').value = '0';
             document.getElementById('elec-new').value = '0';
@@ -2142,10 +2189,9 @@
             document.getElementById('water-has-quota').checked = true;
             document.getElementById('water-price-quota').value = '14,000';
             document.getElementById('water-price-normal').value = '20,000';
-            document.getElementById('room-service').value = '100,000';
+            document.getElementById('room-service').value = '0';
             document.getElementById('room-note').value = '';
             document.getElementById('btnDeleteRoom').classList.add('hidden');
-            handleRoomStatusChange();
             calculateTotal();
             document.getElementById('roomModal').classList.remove('hidden');
         };
@@ -2154,7 +2200,7 @@
             const room = roomsData.find(r => r.docId === docId);
             if (!room) return;
             currentEditingDocId = docId;
-            document.getElementById('modal-title').innerText = `Chỉnh sửa: ${room.name}`;
+            document.getElementById('modal-title').innerText = 'Cập nhật thông tin phòng';
             document.getElementById('room-name').value = room.name || '';
             document.getElementById('room-status').value = room.status || 'Trống';
             document.getElementById('room-tenant').value = room.tenant || '';
@@ -2173,51 +2219,76 @@
             document.getElementById('room-service').value = parseNum(room.service).toLocaleString('en-US');
             document.getElementById('room-note').value = room.note || '';
             document.getElementById('btnDeleteRoom').classList.remove('hidden');
-            handleRoomStatusChange();
             calculateTotal();
             document.getElementById('roomModal').classList.remove('hidden');
-        };
-
-        window.handleRoomStatusChange = function () {
-            const status = document.getElementById('room-status').value;
-            const isRented = status === 'Đang thuê';
-            const tenantInput = document.getElementById('room-tenant');
-            const occupantsInput = document.getElementById('room-occupants');
-
-            if (!isRented) {
-                tenantInput.value = '';
-                occupantsInput.value = '0';
-            } else {
-                if (Number(occupantsInput.value) <= 0) occupantsInput.value = '1';
-            }
-            calculateTotal();
         };
 
         window.closeModal = function () {
             document.getElementById('roomModal').classList.add('hidden');
         };
 
+        window.handleRoomStatusChange = function () {
+            const status = document.getElementById('room-status').value;
+            if (status === 'Trống') {
+                document.getElementById('room-tenant').value = '';
+                document.getElementById('room-occupants').value = '0';
+                document.getElementById('room-phone').value = '';
+                document.getElementById('room-is-paid').value = 'Chưa thanh toán';
+            }
+        };
+
         window.saveRoom = async function (e) {
             e.preventDefault();
-            const btn = e.submitter;
+            const btn = e.target.querySelector('button[type="submit"]');
 
-            const name = document.getElementById('room-name').value.trim();
             const status = document.getElementById('room-status').value;
+            const roomName = document.getElementById('room-name').value.trim();
             const tenant = document.getElementById('room-tenant').value.trim();
-            const occupants = Number(document.getElementById('room-occupants').value || 0);
+            const occupants = parseNum(document.getElementById('room-occupants').value);
 
-            if (status === 'Đang thuê') {
-                if (!tenant) return Swal.fire({ title: 'Thiếu thông tin', text: 'Vui lòng nhập tên khách thuê khi phòng ở trạng thái "Đang thuê".', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
-                if (occupants <= 0) return Swal.fire({ title: 'Thiếu thông tin', text: 'Số người phải lớn hơn 0 khi phòng đang thuê.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            if (!roomName) {
+                return Swal.fire({ title: 'Thiếu tên phòng', text: 'Tên phòng không được để trống hoặc chỉ chứa khoảng trắng.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            if (!currentEditingDocId && roomsData.length >= MAX_ROOMS) {
+                return Swal.fire({ title: 'Đã đủ số phòng', text: `Hệ thống chỉ hỗ trợ tối đa ${MAX_ROOMS} phòng.`, icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            const normalizedName = roomName.normalize('NFC').toLocaleLowerCase('vi-VN');
+            if (roomsData.some(room => room.docId !== currentEditingDocId &&
+                String(room.name || '').trim().normalize('NFC').toLocaleLowerCase('vi-VN') === normalizedName)) {
+                return Swal.fire({ title: 'Tên phòng đã tồn tại', text: 'Mỗi phòng cần có một tên riêng để tránh nhầm hóa đơn và thanh toán.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
             }
 
-            const roomData = {
-                name: name,
+            if (status === 'Đang thuê') {
+                if (!tenant) return Swal.fire({ title: 'Lỗi', text: 'Vui lòng nhập tên khách thuê!', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+                if (!Number.isInteger(occupants) || occupants <= 0) return Swal.fire({ title: 'Lỗi', text: 'Số người ở phải là số nguyên lớn hơn 0!', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+
+            const numericValues = [
+                document.getElementById('room-price').value,
+                document.getElementById('elec-price').value,
+                document.getElementById('elec-old').value,
+                document.getElementById('elec-new').value,
+                document.getElementById('water-old').value,
+                document.getElementById('water-new').value,
+                document.getElementById('water-price-quota').value,
+                document.getElementById('water-price-normal').value,
+                document.getElementById('room-service').value
+            ].map(parseNum);
+            if (numericValues.some(value => !Number.isFinite(value) || value < 0)) {
+                return Swal.fire({ title: 'Số liệu không hợp lệ', text: 'Tiền, đơn giá và chỉ số công tơ phải là số không âm.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+            if (parseNum(document.getElementById('elec-new').value) < parseNum(document.getElementById('elec-old').value) ||
+                parseNum(document.getElementById('water-new').value) < parseNum(document.getElementById('water-old').value)) {
+                return Swal.fire({ title: 'Chỉ số mới không hợp lệ', text: 'Chỉ số mới không được nhỏ hơn chỉ số cũ.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
+
+            const roomObj = {
+                name: roomName,
                 status: status,
-                tenant: status === 'Đang thuê' ? tenant : '',
-                occupants: status === 'Đang thuê' ? occupants : 0,
-                phone: status === 'Đang thuê' ? document.getElementById('room-phone').value.trim() : '',
-                paymentStatus: document.getElementById('room-is-paid').value,
+                tenant: status === 'Trống' ? '' : tenant,
+                occupants: status === 'Trống' ? 0 : occupants,
+                phone: status === 'Trống' ? '' : document.getElementById('room-phone').value.trim(),
+                paymentStatus: status === 'Trống' ? 'Chưa thanh toán' : document.getElementById('room-is-paid').value,
                 price: parseNum(document.getElementById('room-price').value),
                 elecPrice: parseNum(document.getElementById('elec-price').value),
                 elecOld: parseNum(document.getElementById('elec-old').value),
@@ -2228,32 +2299,33 @@
                 waterPriceQuota: parseNum(document.getElementById('water-price-quota').value),
                 waterPriceNormal: parseNum(document.getElementById('water-price-normal').value),
                 service: parseNum(document.getElementById('room-service').value),
-                note: document.getElementById('room-note').value.trim()
+                note: document.getElementById('room-note').value.trim(),
+                lastClosedPeriod: roomsData.find(room => room.docId === currentEditingDocId)?.lastClosedPeriod || null
             };
 
             await executeWithLock(btn, async () => {
                 showLoading();
-                const docId = currentEditingDocId || ('room_' + Date.now());
-                await set(ref(db, 'rooms/' + docId), roomData);
+                const docId = currentEditingDocId || 'room_' + Date.now();
+                await set(ref(db, 'rooms/' + docId), roomObj);
                 await loadAllData();
                 renderFilteredRooms();
                 closeModal();
                 hideLoading();
-                Toast.fire({ icon: 'success', title: 'Đã lưu thông tin phòng thành công!' });
+                Toast.fire({ icon: 'success', title: 'Đã lưu thông tin phòng!' });
             });
         };
 
         window.deleteCurrentRoom = async function (evt) {
-            const btn = evt?.currentTarget || evt?.target;
             if (!currentEditingDocId) return;
+            const btn = evt?.currentTarget || evt?.target;
 
             const res = await Swal.fire({
                 title: 'Xóa phòng này?',
-                text: 'Hành động này không thể hoàn tác!',
+                text: 'Dữ liệu phòng sẽ bị xóa hoàn toàn khỏi hệ thống!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#e11d48',
-                confirmButtonText: 'Xóa',
+                confirmButtonText: 'Xóa vĩnh viễn',
                 cancelButtonText: 'Hủy',
                 customClass: { popup: 'rounded-xl text-xs' }
             });
@@ -2266,7 +2338,7 @@
                     renderFilteredRooms();
                     closeModal();
                     hideLoading();
-                    Toast.fire({ icon: 'success', title: 'Đã xóa phòng thành công!' });
+                    Toast.fire({ icon: 'success', title: 'Đã xóa phòng!' });
                 });
             }
         };
@@ -2275,25 +2347,22 @@
             const btn = evt?.currentTarget || evt?.target;
             const room = roomsData.find(r => r.docId === docId);
             if (!room) return;
+            if (!isBillableRoom(room)) {
+                return Swal.fire({ title: 'Không thể cập nhật', text: 'Phòng chưa có khách thuê nên không phát sinh thanh toán.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            }
 
             await executeWithLock(btn, async () => {
                 showLoading();
-                room.paymentStatus = room.paymentStatus === "Đã thanh toán" ? "Chưa thanh toán" : "Đã thanh toán";
-                await set(ref(db, 'rooms/' + room.docId), room);
+                room.paymentStatus = room.paymentStatus === 'Đã thanh toán' ? 'Chưa thanh toán' : 'Đã thanh toán';
+                await set(ref(db, 'rooms/' + docId), room);
                 await loadAllData();
                 renderFilteredRooms();
-                if (activeTenantRoom && activeTenantRoom.docId === room.docId) {
-                    activeTenantRoom = room;
-                    displayTenantInfo(room);
-                }
                 hideLoading();
-                Toast.fire({ icon: 'success', title: 'Đã cập nhật trạng thái thanh toán!' });
             });
         };
 
         window.openTenantIssueModal = function () {
             if (!activeTenantRoom) return;
-            document.getElementById('issue-text').value = '';
             document.getElementById('issueModal').classList.remove('hidden');
         };
 
@@ -2303,8 +2372,8 @@
 
         window.submitIssue = async function (evt) {
             const btn = evt?.currentTarget || evt?.target;
-            const content = document.getElementById('issue-text').value.trim();
-            if (!content || !activeTenantRoom) return Swal.fire({ title: 'Thiếu thông tin', text: 'Vui lòng mô tả chi tiết sự cố.', icon: 'warning', customClass: { popup: 'rounded-xl text-xs' } });
+            const text = document.getElementById('issue-text').value.trim();
+            if (!text || !activeTenantRoom) return;
 
             await executeWithLock(btn, async () => {
                 showLoading();
@@ -2313,20 +2382,22 @@
                     id: issueId,
                     roomDocId: activeTenantRoom.docId,
                     roomName: activeTenantRoom.name,
-                    tenantName: activeTenantRoom.tenant || 'Khách',
-                    content: content,
-                    date: new Date().toLocaleString('vi-VN'),
-                    resolved: false
+                    tenantName: activeTenantRoom.tenant || 'Khách thuê',
+                    content: text,
+                    resolved: false,
+                    date: new Date().toLocaleString('vi-VN')
                 };
                 await set(ref(db, 'issues/' + issueId), issueData);
-                await loadAllData();
+                document.getElementById('issue-text').value = '';
                 closeIssueModal();
+                await loadAllData();
                 hideLoading();
-                Toast.fire({ icon: 'success', title: 'Đã gửi báo cố thành công!' });
+                Swal.fire({ title: 'Thành công', text: 'Báo cố đã được gửi tới Chủ Trọ.', icon: 'success', customClass: { popup: 'rounded-xl text-xs' } });
             });
         };
 
-        loadAllData();
+        // Khởi tạo giao diện quản trị theo phiên đăng nhập hiện tại.
+        if (sessionStorage.getItem("isAdminLoggedIn") === "true") showAdminView();
     </script>
 </body>
 
