@@ -15,7 +15,6 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<<<<<<< HEAD
     <style>
         @page {
             size: 80mm auto;
@@ -138,9 +137,6 @@
             }
         }
     </style>
-=======
-        <link rel="stylesheet" href="styles.css">
->>>>>>> 835b63379b5309d95a9560258050ed94b05408d1
 </head>
 
 <body class="bg-slate-50 font-sans min-h-screen overflow-x-hidden text-slate-800">
@@ -149,21 +145,12 @@
     <div id="global-loading"
         class="fixed inset-0 bg-slate-900/40 z-[9999] hidden flex flex-col items-center justify-center backdrop-blur-xs">
         <div
-            class="bg-white/95 p-7 rounded-2xl shadow-2xl flex flex-col items-center max-w-xs w-full mx-4 border border-white/80">
-            <div class="loading-orb" aria-hidden="true">
-                <div class="loading-core"><i class="fa-solid fa-building" aria-hidden="true"></i></div>
-            </div>
-            <p class="text-sm font-bold text-slate-800 mt-4">Đang xử lý</p>
-            <p id="loading-text" class="text-xs font-medium text-slate-500 mt-1 text-center">Vui lòng chờ trong giây
-                lát...</p>
-            <div class="loading-dots mt-2" aria-hidden="true"><span></span><span></span><span></span></div>
-            <div class="w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-4">
-                <div class="h-full w-1/2 bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full animate-pulse"></div>
-            </div>
+            class="bg-white p-6 rounded-xl shadow-xl flex flex-col items-center max-w-xs w-full mx-4 border border-slate-100">
+            <div class="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p id="loading-text" class="text-xs font-semibold text-slate-600 mt-3 text-center">Đang xử lý dữ liệu...</p>
         </div>
     </div>
 
-<<<<<<< HEAD
     <section id="admin-login" class="min-h-screen flex items-center justify-center p-5 bg-[#edf2f0]">
         <div class="w-full max-w-md bg-white border border-slate-200 rounded-xl shadow-lg shadow-slate-900/5 p-7 sm:p-9">
             <div class="w-12 h-12 rounded-lg bg-[#173a36] text-emerald-100 flex items-center justify-center text-xl mb-6">
@@ -198,19 +185,6 @@
                 <p class="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-100/50">Quản lý</p>
                 <button onclick="switchAdminTab('tab-overview')" id="nav-tab-overview" aria-current="page" class="admin-tab-btn sidebar-nav-active flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-xs font-semibold transition-colors">
                     <i class="fa-solid fa-chart-pie w-4 text-center"></i> Tổng quan
-=======
-    <!-- Header -->
-    <header class="bg-slate-900 text-white shadow-sm sticky top-0 z-40 border-b border-slate-800">
-        <div
-            class="container mx-auto px-4 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3 max-w-6xl">
-            <h1 class="text-base sm:text-lg font-bold text-center sm:text-left truncate w-full sm:w-auto tracking-wide">
-                <i class="fa-solid fa-building-user mr-2 text-indigo-400"></i> Quản Lý Nhà Trọ
-            </h1>
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
-                <button onclick="switchView('tenant')" id="btn-view-tenant"
-                    class="flex-1 sm:flex-none text-xs bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold shadow-xs transition-all active:scale-95">
-                    <i class="fa-solid fa-user-tag mr-1.5"></i> Cổng Khách
->>>>>>> 835b63379b5309d95a9560258050ed94b05408d1
                 </button>
                 <button onclick="switchAdminTab('tab-rooms')" id="nav-tab-rooms" class="admin-tab-btn sidebar-nav-idle flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-xs font-semibold transition-colors">
                     <i class="fa-solid fa-door-open w-4 text-center"></i> Quản lý phòng
@@ -235,7 +209,6 @@
             </div>
         </aside>
 
-<<<<<<< HEAD
         <div class="min-h-screen lg:ml-64">
             <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:hidden">
                 <button onclick="toggleAdminSidebar()" aria-label="Mở menu" class="flex h-9 w-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100">
@@ -248,23 +221,20 @@
             </header>
 
     <main class="mx-auto w-full max-w-[1440px] px-4 py-5 sm:px-6 sm:py-7">
-=======
-    <main class="container mx-auto px-3.5 py-6 max-w-7xl">
->>>>>>> 835b63379b5309d95a9560258050ed94b05408d1
 
         <!-- CỔNG KHÁCH THUÊ -->
         <div id="view-tenant" class="hidden space-y-5 max-w-lg mx-auto">
             <div
                 class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-2xl p-5 text-white shadow-md text-center break-words border border-slate-800">
-                <h2 class="text-lg font-bold mb-1 tracking-tight"> CổngTra Cứu Hóa Đơn</h2>
-                <p class="text-xs text-slate-300">Nhập tên phòng để xem chi tiết tiền trọ
+                <h2 class="text-lg font-bold mb-1 tracking-tight">Tra Cứu Hóa Đơn & QR Pay</h2>
+                <p class="text-xs text-slate-300">Nhập tên phòng hoặc Số Điện Thoại để xem chi tiết tiền trọ
                 </p>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
                 <div class="flex flex-col sm:flex-row gap-2.5">
                     <div class="animated-border-box border border-slate-200 rounded-lg flex-1">
-                        <input type="text" id="search-keyword" placeholder="VD: Phòng 1 "
+                        <input type="text" id="search-keyword" placeholder="VD: Phòng 1 hoặc SĐT..."
                             class="w-full px-3.5 py-2.5 text-sm bg-transparent rounded-lg"
                             onkeypress="if(event.key==='Enter') searchRoomForTenant()">
                     </div>
@@ -283,7 +253,6 @@
                             <p class="text-xs text-slate-500 mt-0.5">Khách thuê: <span id="t-tenant-name"
                                     class="font-semibold text-slate-700">--</span> (<span id="t-occupants">1</span>
                                 người)</p>
-                            <p id="t-contract-info" class="text-[11px] text-slate-500 mt-1 hidden"></p>
                         </div>
                         <span id="t-payment-status-badge"
                             class="px-2.5 py-1 text-xs rounded-md font-semibold bg-rose-50 text-rose-600 border border-rose-100">Chưa
@@ -314,9 +283,6 @@
                         <div class="flex justify-between"><span class="text-slate-600">Dịch vụ khác:</span>
                             <span id="t-service" class="font-semibold">0 đ</span>
                         </div>
-                        <div id="tenant-debt-row" class="flex justify-between text-rose-600 hidden">
-                            <span>Tiền nợ kỳ trước:</span><span id="t-debt" class="font-semibold">0 đ</span>
-                        </div>
                         <hr class="my-2 border-slate-200">
                         <div class="flex justify-between text-base font-bold text-indigo-600">
                             <span>TỔNG CỘNG:</span>
@@ -346,7 +312,6 @@
         </div>
 
         <!-- GIAO DIỆN QUẢN LÝ CHỦ TRỌ -->
-<<<<<<< HEAD
         <div id="view-admin" class="space-y-5">
             <div class="flex items-end justify-between gap-3 border-b border-slate-200 pb-4">
                 <div>
@@ -498,320 +463,6 @@
                 </section>
             </div>
 
-=======
-        <div id="view-admin" class="hidden space-y-5">
-            <div class="admin-layout flex items-start gap-3 relative">
-                <div id="admin-nav-panel"
-                    class="admin-nav-panel professional-sidebar rounded-[22px] border border-slate-200 bg-white p-3 flex flex-col gap-2.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
-                    <div class="sidebar-brand flex items-center gap-2.5 px-2.5 py-2.5 rounded-[16px] bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white shadow-[0_12px_24px_rgba(99,102,241,0.28)]">
-                        <button onclick="toggleAdminNav()" id="admin-nav-toggle"
-                            class="admin-nav-toggle flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white shadow-sm backdrop-blur-sm transition-all duration-200"
-                            title="Ẩn/hiện thanh điều hướng" aria-expanded="true">
-                            <i class="fa-solid fa-bars text-sm"></i>
-                        </button>
-                        <div class="min-w-0">
-                            <div class="text-[10px] font-medium uppercase tracking-[0.12em] text-indigo-100/90">Quản trị</div>
-                            <div class="text-[15px] font-bold leading-none">Tổng Quan</div>
-                        </div>
-                    </div>
-
-                    <button onclick="switchAdminTab('tab-overview')" id="nav-tab-overview"
-                        class="admin-tab-btn sidebar-item active-sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 transition-all text-left">
-                        <span class="sidebar-icon bg-white/15"><i class="fa-solid fa-chart-pie"></i></span>
-                        <span>Tổng Quan</span>
-                    </button>
-                    <button onclick="switchAdminTab('tab-rooms')" id="nav-tab-rooms"
-                        class="admin-tab-btn sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 transition-all text-left">
-                        <span class="sidebar-icon"><i class="fa-solid fa-door-open"></i></span>
-                        <span>Quản Lý Phòng</span>
-                    </button>
-                    <button onclick="switchAdminTab('tab-invoices')" id="nav-tab-invoices"
-                        class="admin-tab-btn sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 transition-all text-left">
-                        <span class="sidebar-icon"><i class="fa-solid fa-receipt"></i></span>
-                        <span>Lịch Sử HĐ</span>
-                    </button>
-                    <button onclick="switchAdminTab('tab-payment-requests')" id="nav-tab-payment-requests"
-                        class="admin-tab-btn sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 relative transition-all text-left">
-                        <span class="sidebar-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
-                        <span>Yêu Cầu HĐ</span>
-                        <span id="badge-payment-requests" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden ml-auto">0</span>
-                    </button>
-                    <button onclick="switchAdminTab('tab-issues')" id="nav-tab-issues"
-                        class="admin-tab-btn sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 relative transition-all text-left">
-                        <span class="sidebar-icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
-                        <span>Sự Cố</span>
-                        <span id="badge-issues" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden ml-auto">0</span>
-                    </button>
-                    <button onclick="switchAdminTab('tab-chats')" id="nav-tab-chats"
-                        class="admin-tab-btn sidebar-item h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 relative transition-all text-left">
-                        <span class="sidebar-icon"><i class="fa-solid fa-comments"></i></span>
-                        <span>Nhắn Tin</span>
-                        <span id="badge-chats" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden ml-auto">0</span>
-                    </button>
-                    <button onclick="logoutAdmin()"
-                        class="sidebar-item sidebar-logout h-11 px-3 text-[14px] font-semibold rounded-xl flex items-center gap-3 shrink-0 mt-auto transition-all text-left">
-                        <span class="sidebar-icon"><i class="fa-solid fa-lock"></i></span>
-                        <span>Khóa</span>
-                    </button>
-                </div>
-                <button onclick="toggleAdminNav()" id="admin-nav-toggle"
-                    class="admin-nav-toggle absolute left-0 top-4 -translate-x-1/2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-full w-9 h-9 flex items-center justify-center shadow-sm z-10"
-                    title="Ẩn/hiện thanh điều hướng" aria-expanded="true">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <div class="flex-1 min-w-0 space-y-5 dashboard-shell">
-                    <div class="dashboard-heading-chip">
-                        <span class="dashboard-heading-icon"><i class="fa-solid fa-gauge-high"></i></span>
-                        <span>Bảng điều khiển Chủ Trọ</span>
-                    </div>
-
-                    <!-- TAB 1: TỔNG QUAN -->
-                    <div id="tab-overview" class="admin-tab-content space-y-4">
-                        <section class="admin-stats-grid">
-                            <div
-                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-blue-500 flex items-center justify-between">
-                                <div>
-                                    <p class="text-slate-500 text-[11px] font-semibold">Tổng phòng</p>
-                                    <h3 id="stat-total" class="text-lg font-bold text-slate-800">0</h3>
-                                </div>
-                                <i class="fa-solid fa-door-open text-xl text-blue-500/80"></i>
-                            </div>
-                            <div
-                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-emerald-500 flex items-center justify-between">
-                                <div>
-                                    <p class="text-slate-500 text-[11px] font-semibold">Đang thuê</p>
-                                    <h3 id="stat-rented" class="text-lg font-bold text-emerald-600">0</h3>
-                                </div>
-                                <i class="fa-solid fa-users text-xl text-emerald-500/80"></i>
-                            </div>
-                            <div
-                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-amber-500 flex items-center justify-between">
-                                <div>
-                                    <p class="text-slate-500 text-[11px] font-semibold">Phòng trống</p>
-                                    <h3 id="stat-empty" class="text-lg font-bold text-amber-600">0</h3>
-                                </div>
-                                <i class="fa-solid fa-bed text-xl text-amber-500/80"></i>
-                            </div>
-                            <div
-                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-indigo-500 flex items-center justify-between">
-                                <div>
-                                    <p class="text-slate-500 text-[11px] font-semibold">Dự kiến tháng này</p>
-                                    <h3 id="stat-expected-revenue" class="text-xs sm:text-sm font-bold text-indigo-600">
-                                        0 đ</h3>
-                                </div>
-                                <i class="fa-solid fa-calculator text-xl text-indigo-500/80"></i>
-                            </div>
-                            <div
-                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-purple-500 flex items-center justify-between">
-                                <div>
-                                    <p class="text-slate-500 text-[11px] font-semibold">Thực tế đã thu</p>
-                                    <h3 id="stat-revenue" class="text-xs sm:text-sm font-bold text-purple-600">0 đ</h3>
-                                </div>
-                                <i class="fa-solid fa-money-bill-wave text-xl text-purple-500/80"></i>
-                            </div>
-                            <div
-                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-rose-500 flex items-center justify-between">
-                                <div>
-                                    <p class="text-slate-500 text-[11px] font-semibold">Tổng nợ hiện tại</p>
-                                    <h3 id="stat-debt" class="text-xs sm:text-sm font-bold text-rose-600">0 đ</h3>
-                                </div>
-                                <i class="fa-solid fa-file-invoice-dollar text-xl text-rose-500/80"></i>
-                            </div>
-                            <div
-                                class="admin-stat-card bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-fuchsia-500 flex items-center justify-between">
-                                <div>
-                                    <p class="text-slate-500 text-[11px] font-semibold">Tổng doanh thu đã ghi nhận</p>
-                                    <h3 id="stat-total-revenue" class="text-xs sm:text-sm font-bold text-fuchsia-600">0
-                                        đ</h3>
-                                </div>
-                                <i class="fa-solid fa-chart-line text-xl text-fuchsia-500/80"></i>
-                            </div>
-                        </section>
-
-                        <section class="dashboard-panel">
-                            <div class="dashboard-panel__header">
-                                <h2><i class="fa-solid fa-chart-column"></i> Dự Kiến Và Thực Tế Theo Tháng</h2>
-                            </div>
-                            <div class="relative h-60 sm:h-72 w-full">
-                                <canvas id="revenueChart"></canvas>
-                            </div>
-                        </section>
-                        <section class="dashboard-panel">
-                            <div class="dashboard-panel__header">
-                                <h2><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Công Nợ Theo Tháng</h2>
-                            </div>
-                            <div id="debt-history-report" class="overflow-x-auto"></div>
-                        </section>
-
-                        <section class="dashboard-panel">
-                            <div class="dashboard-panel__header">
-                                <h2><i class="fa-solid fa-code-compare"></i> So Sánh Doanh Thu Theo Tháng</h2>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Tháng 1
-                                        (Gốc):</label>
-                                    <select id="compare-month-1" onchange="renderRevenueComparison()"
-                                        class="w-full border border-slate-200 rounded-lg p-2 text-xs font-semibold bg-slate-50"></select>
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Tháng 2 (So
-                                        sánh):</label>
-                                    <select id="compare-month-2" onchange="renderRevenueComparison()"
-                                        class="w-full border border-slate-200 rounded-lg p-2 text-xs font-semibold bg-slate-50"></select>
-                                </div>
-                            </div>
-
-                            <div class="overflow-x-auto border border-slate-200 rounded-lg">
-                                <table class="w-full text-left text-xs">
-                                    <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                                        <tr>
-                                            <th class="p-2.5">Chỉ số</th>
-                                            <th id="th-month-1" class="p-2.5 text-right">Tháng 1</th>
-                                            <th id="th-month-2" class="p-2.5 text-right">Tháng 2</th>
-                                            <th class="p-2.5 text-right">Chênh lệch</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="comparison-table-body" class="divide-y divide-slate-100 text-slate-700">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </section>
-                    </div>
-
-                    <!-- TAB 2: QUẢN LÝ PHÒNG -->
-                    <div id="tab-rooms" class="admin-tab-content hidden space-y-4">
-                        <section class="dashboard-panel">
-                            <div class="dashboard-panel__header flex-col sm:flex-row items-start sm:items-center gap-3">
-                                <h2><i class="fa-solid fa-list"></i> Danh Sách Phòng (<span id="room-count-badge">0</span>/12)</h2>
-                                <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto mobile-action-group">
-                                    <button onclick="promptNextMonth(event)"
-                                        class="mobile-action-btn text-[11px] bg-indigo-600 text-white px-3 py-2.5 rounded-lg hover:bg-indigo-700 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-calendar-plus"></i> Chốt Tháng Mới
-                                    </button>
-                                    <button onclick="createPreCloseBackup()"
-                                        class="mobile-action-btn text-[11px] bg-violet-500 text-white px-3 py-2.5 rounded-lg hover:bg-violet-600 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-floppy-disk"></i> Backup trước chốt
-                                    </button>
-                                    <button id="btn-add-room" onclick="openAddRoomModal()"
-                                        class="mobile-action-btn text-[11px] sm:text-xs bg-slate-900 text-white px-3 py-2.5 rounded-lg hover:bg-slate-800 font-semibold shadow-xs transition-all active:scale-95 flex items-center gap-1.5 ml-auto sm:ml-0">
-                                        <i class="fa-solid fa-plus"></i> Thêm Phòng
-                                    </button>
-                                    <button onclick="exportBackup('json')"
-                                        class="mobile-action-btn text-[11px] bg-emerald-600 text-white px-3 py-2.5 rounded-lg hover:bg-emerald-700 font-semibold flex items-center gap-1.5">
-                                        <i class="fa-solid fa-download"></i> Xuất JSON
-                                    </button>
-                                    <button onclick="exportBackup('xlsx')"
-                                        class="mobile-action-btn text-[11px] bg-cyan-600 text-white px-3 py-2.5 rounded-lg hover:bg-cyan-700 font-semibold flex items-center gap-1.5">
-                                        <i class="fa-solid fa-file-excel"></i> Xuất Excel
-                                    </button>
-                                    <button onclick="document.getElementById('backup-file-input').click()"
-                                        class="mobile-action-btn text-[11px] bg-slate-100 text-slate-700 px-3 py-2.5 rounded-lg hover:bg-slate-200 font-semibold flex items-center gap-1.5">
-                                        <i class="fa-solid fa-upload"></i> Khôi phục backup
-                                    </button>
-                                    <button onclick="document.getElementById('backup-image-input').click()"
-                                        class="mobile-action-btn text-[11px] bg-amber-500 text-white px-3 py-2.5 rounded-lg hover:bg-amber-600 font-semibold flex items-center gap-1.5">
-                                        <i class="fa-solid fa-image"></i> Xuất ảnh từ JSON
-                                    </button>
-                                    <input id="backup-file-input" type="file" accept=".json,.xlsx,.xls" class="hidden"
-                                        onchange="importBackupFile(this.files[0])">
-                                    <input id="backup-image-input" type="file" accept=".json" class="hidden"
-                                        onchange="renderBackupSnapshotImage(this.files[0])">
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-100">
-                                <div class="animated-border-box border border-slate-200 rounded-lg">
-                                    <input type="text" id="admin-search-kw"
-                                        placeholder="Tìm tên phòng hoặc tên khách..."
-                                        class="w-full px-3 py-2 text-xs bg-transparent" oninput="renderFilteredRooms()">
-                                </div>
-                                <div class="animated-border-box border border-slate-200 rounded-lg">
-                                    <select id="admin-filter-status"
-                                        class="w-full px-3 py-2 text-xs bg-transparent font-medium text-slate-700"
-                                        onchange="renderFilteredRooms()">
-                                        <option value="all">Tất cả trạng thái thanh toán</option>
-                                        <option value="paid">Đã thanh toán</option>
-                                        <option value="unpaid">Chưa thanh toán</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div id="room-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1"></div>
-                        </section>
-
-                        <section class="dashboard-panel">
-                            <div class="dashboard-panel__header">
-                                <h2><i class="fa-solid fa-box-archive"></i> Kho Backup Chốt Tháng</h2>
-                            </div>
-                            <div id="archive-history-list" class="space-y-2.5"></div>
-                        </section>
-                    </div>
-
-                    <!-- TAB 3: LỊCH SỬ HÓA ĐƠN -->
-                    <div id="tab-invoices" class="admin-tab-content hidden space-y-4">
-                        <section class="dashboard-panel">
-                            <div class="dashboard-panel__header">
-                                <h2><i class="fa-solid fa-database"></i> Tra Cứu Phiếu Tính Tiền Đã In</h2>
-                                <button onclick="clearAllInvoices(event)"
-                                    class="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg font-semibold transition-all">
-                                    <i class="fa-solid fa-trash-can mr-1"></i> Xóa tất cả lịch sử
-                                </button>
-                            </div>
-                            <div id="invoice-history-cards" class="space-y-2.5"></div>
-                        </section>
-                    </div>
-
-                    <!-- TAB 4: YÊU CẦU XUẤT HÓA ĐƠN -->
-                    <div id="tab-payment-requests" class="admin-tab-content hidden space-y-4">
-                        <section class="dashboard-panel">
-                            <div class="dashboard-panel__header">
-                                <h2><i class="fa-solid fa-file-invoice-dollar"></i> Yêu Cầu Xuất Hóa Đơn Từ Khách</h2>
-                            </div>
-                            <p class="text-[11px] text-slate-500">Khách chỉ được in hóa đơn sau khi Chủ Trọ xác nhận đã nhận tiền.</p>
-                            <div id="payment-requests-container" class="space-y-2.5"></div>
-                        </section>
-                    </div>
-
-                    <!-- TAB 5: SỰ CỐ -->
-                    <div id="tab-issues" class="admin-tab-content hidden space-y-4">
-                        <section class="dashboard-panel">
-                            <div class="dashboard-panel__header">
-                                <h2><i class="fa-solid fa-screwdriver-wrench"></i> Báo Cố Từ Khách</h2>
-                            </div>
-                            <div id="admin-issues-container" class="space-y-2.5"></div>
-                        </section>
-                    </div>
-
-                    <!-- TAB 6: NHẮN TIN (QUẢN TRỊ) -->
-                    <div id="tab-chats" class="admin-tab-content hidden space-y-4">
-                        <section class="dashboard-panel">
-                            <div class="dashboard-panel__header flex-col sm:flex-row items-start sm:items-center gap-2">
-                                <div>
-                                    <h2><i class="fa-solid fa-comments"></i> Trung Tâm Nhắn Tin Khách Thuê</h2>
-                                    <p class="text-[11px] text-slate-500 mt-1">Trao đổi trực tiếp với từng phòng. Tin nhắn tự động được lưu trữ.</p>
-                                </div>
-                                <button onclick="clearAllChatsDatabase(event)"
-                                    class="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg font-semibold transition-all shrink-0">
-                                    <i class="fa-solid fa-trash-can mr-1"></i> Làm sạch CSDL Tin Nhắn
-                                </button>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                                <div class="border border-slate-200 rounded-xl p-2 space-y-1 bg-slate-50/50 max-h-[500px] overflow-y-auto"
-                                    id="admin-chat-room-list">
-                                </div>
-                                <div class="md:col-span-2 border border-slate-200 rounded-xl p-3 flex flex-col h-[500px] bg-white"
-                                    id="admin-chat-box-container">
-                                    <div class="text-center text-slate-400 my-auto text-xs">Vui lòng chọn một phòng bên
-                                        trái để
-                                        bắt đầu nhắn tin.</div>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
-                </div>
-            </div>
->>>>>>> 835b63379b5309d95a9560258050ed94b05408d1
         </div>
     </main>
         </div>
@@ -819,23 +470,32 @@
 
     <!-- Hidden Print Area -->
     <div id="printArea" class="hidden">
-        <div style="text-align: center; margin-bottom: 6px;">
-            <h2 style="font-weight: bold; font-size: 15px;">HÓA ĐƠN TIỀN TRỌ</h2>
-            <p id="print-date" style="font-size: 10px; margin: 2px 0;"></p>
+        <div style="text-align: center; margin-bottom: 8px;">
+            <h2 style="font-weight: bold; font-size: 16px;">HÓA ĐƠN THANH TOÁN TIỀN TRỌ</h2>
+            <p id="print-date" style="font-size: 11px; color: #555;"></p>
         </div>
-        <div style="font-size: 11px; line-height: 1.4;">
+        <div style="font-size: 12px; line-height: 1.5;">
             <p><strong>Phòng:</strong> <span id="p-room"></span></p>
             <p><strong>Khách thuê:</strong> <span id="p-tenant"></span> (<span id="p-occupants"></span> người)</p>
-            <hr style="border: 0; border-top: 1px dashed #000; margin: 6px 0;">
-            <p>Tiền phòng: <span id="p-price"></span></p>
+            <hr style="border: 0; border-top: 1px solid #ddd; margin: 8px 0;">
+            <p>Tiền phòng cố định: <span id="p-price"></span></p>
             <p>Tiền Điện (<span id="p-elec-qty"></span> kWh): <span id="p-elec"></span></p>
             <p>Tiền Nước: <span id="p-water"></span></p>
-            <p style="font-size: 10px; margin-left: 8px; margin-top: -2px;" id="p-water-desc"></p>
+            <p style="font-size: 11px; color: #555; margin-left: 10px; margin-top: -2px;" id="p-water-desc"></p>
             <p>Dịch vụ khác: <span id="p-service"></span></p>
-            <p id="p-debt-row">Nợ kỳ trước: <span id="p-debt"></span></p>
-            <hr style="border: 0; border-top: 1px dashed #000; margin: 6px 0;">
-            <p style="font-size: 13px; font-weight: bold;">TỔNG CỘNG: <span id="p-total"></span></p>
-            <p style="margin-top: 2px;"><strong>Trạng thái:</strong> <span id="p-status"></span></p>
+            <hr style="border: 0; border-top: 1px solid #ddd; margin: 8px 0;">
+            <p style="font-size: 14px; font-weight: bold;">TỔNG CỘNG: <span id="p-total" style="color: #4f46e5;"></span>
+            </p>
+            <p style="margin-top: 4px;"><strong>Trạng thái:</strong> <span id="p-status"></span></p>
+        </div>
+        <div
+            style="display: flex; justify-content: space-between; margin-top: 16px; text-align: center; font-size: 10px;">
+            <div>
+                <p><strong>Chủ trọ</strong><br>(Ký, ghi rõ họ tên)</p>
+            </div>
+            <div>
+                <p><strong>Người nộp tiền</strong><br>(Ký, ghi rõ họ tên)</p>
+            </div>
         </div>
     </div>
 
@@ -858,12 +518,6 @@
                 <input type="text" id="tenant-chat-input" placeholder="Nhập nội dung tin nhắn..."
                     class="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:border-cyan-600 bg-white"
                     onkeypress="if(event.key==='Enter') sendTenantMessage()">
-                <label
-                    class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs cursor-pointer"
-                    title="Gửi hình ảnh">
-                    <i class="fa-solid fa-image"></i>
-                    <input type="file" id="tenant-chat-image" accept="image/*" class="hidden">
-                </label>
                 <button onclick="sendTenantMessage()"
                     class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all active:scale-95">
                     <i class="fa-solid fa-paper-plane"></i> Gửi
@@ -936,7 +590,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2.5">
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label class="block text-[11px] font-bold mb-1 text-slate-700">Tiền phòng (đ):</label>
                         <div class="animated-border-box border border-slate-200 rounded-lg">
@@ -951,15 +605,6 @@
                         <div class="animated-border-box border border-slate-200 rounded-lg">
                             <input type="text" id="elec-price" value="4,000"
                                 class="w-full px-3 py-2 text-xs font-medium bg-transparent"
-                                onfocus="handleNumFocus(this)" onblur="handleNumBlur(this, 0)"
-                                oninput="formatAndCalculate(this)">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold mb-1 text-slate-700">Nợ tháng trước (đ):</label>
-                        <div class="animated-border-box border border-slate-200 rounded-lg">
-                            <input type="text" id="room-previous-debt" value="0"
-                                class="w-full px-3 py-2 text-xs font-bold text-rose-600 bg-transparent"
                                 onfocus="handleNumFocus(this)" onblur="handleNumBlur(this, 0)"
                                 oninput="formatAndCalculate(this)">
                         </div>
@@ -1085,13 +730,6 @@
                 <textarea id="issue-text" rows="3" class="w-full p-2.5 text-xs bg-transparent"
                     placeholder="Mô tả chi tiết sự cố bạn gặp phải (VD: Hỏng bóng đèn, nghẹt nước...)..."></textarea>
             </div>
-            <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-                <i class="fa-solid fa-image text-amber-600"></i>
-                <span>Đính kèm hình ảnh (tùy chọn)</span>
-                <input type="file" id="issue-image" accept="image/*" class="hidden"
-                    onchange="document.getElementById('issue-image-name').innerText = this.files[0]?.name || ''">
-            </label>
-            <p id="issue-image-name" class="text-[11px] text-slate-400"></p>
             <div class="flex justify-end gap-2 pt-1">
                 <button type="button" onclick="closeIssueModal()"
                     class="bg-slate-100 px-3.5 py-2 rounded-lg text-xs font-semibold hover:bg-slate-200 transition-all active:scale-95">Hủy</button>
@@ -1103,7 +741,6 @@
     </div>
 
     <!-- Firebase Script & Logic -->
-<<<<<<< HEAD
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, get, set, remove, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -2762,9 +2399,6 @@
         // Khởi tạo giao diện quản trị theo phiên đăng nhập hiện tại.
         if (sessionStorage.getItem("isAdminLoggedIn") === "true") showAdminView();
     </script>
-=======
-        <script type="module" src="app.js"></script>
->>>>>>> 835b63379b5309d95a9560258050ed94b05408d1
 </body>
 
 </html>
