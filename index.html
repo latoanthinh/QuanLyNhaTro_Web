@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#F4F2EE">
     <title>Hệ Thống Quản Lý Nhà Trọ</title>
+    <script>
+        const savedTheme = localStorage.getItem('appTheme');
+        document.documentElement.dataset.theme = savedTheme === 'dark' ? 'dark' : 'light';
+    </script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -107,7 +112,7 @@
                     color: #000 !important;
                 }
             }
-        }
+
             @property --angle {
                 syntax: '<angle>';
                 initial-value: 0deg;
@@ -251,34 +256,6 @@
                 }
             }
 
-            .admin-nav-panel {
-                width: 220px;
-                min-width: 220px;
-                max-height: none;
-                min-height: 420px;
-                opacity: 1;
-                transform: translateY(0);
-                overflow: hidden;
-                transition: width 0.3s ease, min-width 0.3s ease, opacity 0.2s ease, transform 0.3s ease;
-            }
-
-            .admin-nav-panel.is-collapsed {
-                width: 0;
-                min-width: 0;
-                max-height: none;
-                opacity: 0;
-                transform: translateX(-18px);
-                pointer-events: none;
-            }
-
-            .admin-nav-toggle {
-                transition: transform 0.3s ease, background-color 0.2s ease;
-            }
-
-            .admin-nav-toggle.is-collapsed {
-                transform: none;
-            }
-
             .admin-layout {
                 min-width: 0;
                 overflow: visible;
@@ -305,45 +282,13 @@
                 overflow-wrap: anywhere;
             }
 
-            @media (max-width: 640px) {
-                .admin-layout {
-                    flex-direction: column;
-                    gap: 0.75rem;
-                }
-
-                .admin-nav-panel {
-                    width: 100%;
-                    min-width: 0;
-                    min-height: auto;
-                    max-height: 30rem;
-                    transition: max-height 0.3s ease, opacity 0.2s ease, transform 0.3s ease;
-                }
-
-                .admin-nav-panel.is-collapsed {
-                    width: 0;
-                    min-height: 0;
-                    max-height: 0;
-                    padding-top: 0;
-                    padding-bottom: 0;
-                }
-
-                .admin-nav-toggle {
-                    position: relative;
-                    top: auto;
-                    left: auto;
-                    transform: none;
-                    align-self: flex-start;
-                    margin: 0 0 -0.25rem 0.25rem;
-                }
-
-                .admin-nav-toggle.is-collapsed {
-                    transform: none;
-                }
-            }
     </style>
+    <link rel="stylesheet" href="assets/css/lucian-tokens.css">
+    <link rel="stylesheet" href="assets/css/lucian-041.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
 
-<body class="bg-slate-50 font-sans min-h-screen overflow-x-hidden text-slate-800">
+<body class="font-sans min-h-screen overflow-x-hidden">
 
     <!-- Loading Overlay -->
     <div id="global-loading"
@@ -363,188 +308,110 @@
         </div>
     </div>
 
-    <!-- Header -->
-    <header class="bg-slate-900 text-white shadow-sm sticky top-0 z-40 border-b border-slate-800">
-        <div
-            class="container mx-auto px-4 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3 max-w-6xl">
-            <h1 class="text-base sm:text-lg font-bold text-center sm:text-left truncate w-full sm:w-auto tracking-wide">
-                <i class="fa-solid fa-building-user mr-2 text-indigo-400"></i> Quản Lý Nhà Trọ
-            </h1>
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
-                <button onclick="switchView('tenant')" id="btn-view-tenant"
-                    class="flex-1 sm:flex-none text-xs bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold shadow-xs transition-all active:scale-95">
-                    <i class="fa-solid fa-user-tag mr-1.5"></i> Cổng Khách
-                </button>
-                <button onclick="toggleAdminMode()" id="btn-view-admin"
-                    class="flex-1 sm:flex-none text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg font-semibold border border-slate-700 transition-all active:scale-95">
-                    <i class="fa-solid fa-user-shield mr-1.5 text-indigo-400"></i> Chủ Trọ
-                </button>
-                <button onclick="switchAdminTab('tab-invoices')" id="nav-tab-invoices" class="admin-tab-btn sidebar-nav-idle flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-xs font-semibold transition-colors">
-                    <i class="fa-solid fa-receipt w-4 text-center"></i> Lịch sử hóa đơn
-                </button>
-
-            </nav>
-
-            <div class="border-t border-white/10 p-3">
-                <div class="mb-3 flex items-center gap-2.5 px-2 py-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-[#173a36]">CT</div>
-                    <div>
-                        <p class="text-xs font-semibold">Chủ trọ</p>
-                        <p class="text-[10px] text-emerald-100/60">Quản trị viên</p>
-                    </div>
+    <section id="admin-login" class="login-page">
+        <div class="login-layout">
+            <div class="login-visual">
+                <div class="login-brand">
+                    <span class="login-brand-mark"><i class="fa-solid fa-building-user" aria-hidden="true"></i></span>
+                    <span>NHÀ TRỌ <span class="text-white/50">/</span> QUẢN TRỊ</span>
                 </div>
-                <button onclick="logoutAdmin()" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-rose-200 transition-colors hover:bg-rose-400/10">
-                    <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i> Đăng xuất
-                </button>
+                <div class="login-visual-copy">
+                    <span class="login-kicker">Không gian vận hành</span>
+                    <h2>Mọi thứ về<br>nhà trọ, trong tầm tay.</h2>
+                    <p>Theo dõi phòng, chốt tiền hàng tháng và quản lý hóa đơn trên một bảng điều khiển gọn gàng.</p>
+                </div>
+                <span class="login-visual-foot">Quản lý đơn giản · Vận hành an tâm</span>
             </div>
-        </aside>
-
-        <div class="min-h-screen lg:ml-64">
-            <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:hidden">
-                <button onclick="toggleAdminSidebar()" aria-label="Mở menu" class="flex h-9 w-9 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <span id="admin-mobile-title" class="text-xs font-bold text-slate-800">Quản lý nhà trọ</span>
-                <button onclick="logoutAdmin()" aria-label="Đăng xuất" title="Đăng xuất" class="flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                </button>
-            </header>
-
-    <main class="mx-auto w-full max-w-[1440px] px-4 py-5 sm:px-6 sm:py-7">
-
-        <!-- CỔNG KHÁCH THUÊ -->
-        <div id="view-tenant" class="hidden space-y-5 max-w-lg mx-auto">
-            <div
-                class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-2xl p-5 text-white shadow-md text-center break-words border border-slate-800">
-                <h2 class="text-lg font-bold mb-1 tracking-tight">Tra Cứu Hóa Đơn & QR Pay</h2>
-                <p class="text-xs text-slate-300">Nhập tên phòng hoặc Số Điện Thoại để xem chi tiết tiền trọ
-                </p>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
-                <div class="flex flex-col sm:flex-row gap-2.5">
-                    <div class="animated-border-box border border-slate-200 rounded-lg flex-1">
-                        <input type="text" id="search-keyword" placeholder="VD: Phòng 1 hoặc SĐT..."
-                            class="w-full px-3.5 py-2.5 text-sm bg-transparent rounded-lg"
-                            onkeypress="if(event.key==='Enter') searchRoomForTenant()">
-                    </div>
-                    <button onclick="searchRoomForTenant()"
-                        class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-indigo-700 w-full sm:w-auto shadow-xs transition-all active:scale-95 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-magnifying-glass"></i> Tra cứu
+            <div class="login-form-panel">
+                <div class="login-form-content">
+                    <span class="login-kicker">Chào mừng trở lại</span>
+                    <h1>Đăng nhập quản trị</h1>
+                    <p class="login-description">Đăng nhập để tiếp tục quản lý phòng và doanh thu của bạn.</p>
+                    <button type="button" class="login-submit" onclick="toggleAdminMode()">
+                        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                        Đăng nhập chủ trọ
+                        <i class="fa-solid fa-arrow-right ml-auto" aria-hidden="true"></i>
                     </button>
-                </div>
-
-                <div id="tenant-result"
-                    class="hidden border border-slate-200 rounded-xl p-4 sm:p-5 bg-slate-50/50 space-y-4 break-words">
-                    <div
-                        class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 gap-2">
-                        <div>
-                            <h3 id="t-room-name" class="text-lg font-bold text-slate-900">Phòng --</h3>
-                            <p class="text-xs text-slate-500 mt-0.5">Khách thuê: <span id="t-tenant-name"
-                                    class="font-semibold text-slate-700">--</span> (<span id="t-occupants">1</span>
-                                người)</p>
-                        </div>
-                        <span id="t-payment-status-badge"
-                            class="px-2.5 py-1 text-xs rounded-md font-semibold bg-rose-50 text-rose-600 border border-rose-100">Chưa
-                            thanh toán</span>
+                    <div class="login-security-note">
+                        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                        <span>Khu vực quản trị dành riêng cho chủ trọ. Vui lòng không chia sẻ quyền truy cập.</span>
                     </div>
-
-                    <!-- Khu vực hiển thị thông báo trạng thái/lý do từ chối từ Chủ trọ -->
-                    <div id="tenant-rejection-notice"
-                        class="hidden bg-rose-50 border border-rose-200 p-3 rounded-xl text-xs text-rose-700 space-y-1">
-                        <p class="font-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i> Yêu cầu xuất HĐ bị từ
-                            chối:</p>
-                        <p id="t-rejection-reason" class="italic"></p>
-                    </div>
-
-                    <div class="space-y-2 text-xs sm:text-sm">
-                        <div class="flex justify-between"><span class="text-slate-600">Tiền phòng:</span> <span
-                                id="t-price" class="font-semibold">0 đ</span></div>
-                        <div class="flex justify-between"><span class="text-slate-600">Tiền Điện (<span
-                                    id="t-elec-qty">0</span> kWh):</span> <span id="t-elec-total"
-                                class="font-semibold">0 đ</span></div>
-                        <div class="flex justify-between flex-col gap-0.5">
-                            <div class="flex justify-between">
-                                <span class="text-slate-600">Tiền Nước:</span>
-                                <span id="t-water-total" class="font-semibold">0 đ</span>
-                            </div>
-                            <span id="t-water-desc" class="text-[11px] text-slate-400 italic">--</span>
-                        </div>
-                        <div class="flex justify-between"><span class="text-slate-600">Dịch vụ khác:</span>
-                            <span id="t-service" class="font-semibold">0 đ</span>
-                        </div>
-                        <hr class="my-2 border-slate-200">
-                        <div class="flex justify-between text-base font-bold text-indigo-600">
-                            <span>TỔNG CỘNG:</span>
-                            <span id="t-total">0 đ</span>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200">
-                        <button id="tenant-invoice-action" onclick="requestInvoice(event)"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold py-2.5 px-2 rounded-lg shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95">
-                            <i class="fa-solid fa-file-circle-plus"></i> Yêu cầu HĐ
-                        </button>
-                        <button onclick="openTenantIssueModal()"
-                            class="bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-semibold py-2.5 px-2 rounded-lg shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95">
-                            <i class="fa-solid fa-triangle-exclamation"></i> Báo Sự Cố
-                        </button>
-                        <button onclick="openTenantChatModal()"
-                            class="bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] font-semibold py-2.5 px-2 rounded-lg shadow-xs flex items-center justify-center gap-1 transition-all active:scale-95">
-                            <i class="fa-solid fa-comments"></i> Nhắn Tin
-                        </button>
-                    </div>
-
-                    <div id="tenant-payment-box"
-                        class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs mt-3 space-y-3"></div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- GIAO DIỆN QUẢN LÝ CHỦ TRỌ -->
-        <div id="view-admin" class="hidden space-y-5">
-            <div class="admin-layout flex items-start gap-3 relative">
-                <div id="admin-nav-panel"
-                    class="admin-nav-panel bg-white rounded-xl shadow-xs p-2 flex flex-col gap-1.5 border border-slate-200">
-                    <button onclick="switchAdminTab('tab-overview')" id="nav-tab-overview"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-indigo-600 text-white flex items-center gap-2 shrink-0 transition-all text-left">
-                        <i class="fa-solid fa-chart-pie"></i> Tổng Quan
+    <div id="admin-shell" class="admin-shell hidden">
+        <aside class="admin-sidebar" aria-label="Điều hướng quản trị">
+            <div class="sidebar-brand">
+                <span class="sidebar-brand-mark"><i class="fa-solid fa-building-user" aria-hidden="true"></i></span>
+                <span class="sidebar-brand-copy">
+                    <strong>Nhà Trọ</strong>
+                    <small>BẢNG ĐIỀU KHIỂN</small>
+                </span>
+            </div>
+            <p class="sidebar-caption">Quản lý</p>
+            <nav class="admin-sidebar-nav" role="tablist" aria-label="Các mục quản trị">
+                <button onclick="switchAdminTab('tab-overview')" id="nav-tab-overview" class="admin-tab-btn is-active"
+                    type="button" role="tab" aria-selected="true" aria-controls="tab-overview" tabindex="0">
+                    <i class="fa-solid fa-chart-pie" aria-hidden="true"></i> Tổng quan
+                </button>
+                <button onclick="switchAdminTab('tab-rooms')" id="nav-tab-rooms" class="admin-tab-btn"
+                    type="button" role="tab" aria-selected="false" aria-controls="tab-rooms" tabindex="-1">
+                    <i class="fa-solid fa-door-open" aria-hidden="true"></i> Quản lý phòng
+                </button>
+                <button onclick="switchAdminTab('tab-invoices')" id="nav-tab-invoices" class="admin-tab-btn"
+                    type="button" role="tab" aria-selected="false" aria-controls="tab-invoices" tabindex="-1">
+                    <i class="fa-solid fa-receipt" aria-hidden="true"></i> Lịch sử hóa đơn
+                </button>
+            </nav>
+            <div class="sidebar-bottom">
+                <div class="sidebar-profile">
+                    <span class="sidebar-avatar">CT</span>
+                    <span class="sidebar-profile-copy">
+                        <strong>Chủ trọ</strong>
+                        <small>Quản trị viên</small>
+                    </span>
+                </div>
+                <button type="button" class="sidebar-logout" onclick="logoutAdmin()">
+                    <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+        <div class="admin-workspace">
+            <header class="admin-topbar">
+                <div class="topbar-context">
+                    <i class="fa-solid fa-grid-2" aria-hidden="true"></i>
+                    <span>Không gian quản trị</span>
+                    <i class="fa-solid fa-chevron-right text-[9px]" aria-hidden="true"></i>
+                    <strong id="admin-current-section">Tổng quan</strong>
+                </div>
+                <div class="topbar-actions">
+                    <span id="admin-date" class="topbar-date"></span>
+                    <button id="theme-toggle" class="theme-toggle" type="button" onclick="toggleTheme()"
+                        aria-label="Chuyển sang giao diện tối" aria-pressed="false" title="Chuyển giao diện">
+                        <i id="theme-icon" class="fa-solid fa-moon" aria-hidden="true"></i>
                     </button>
-                    <button onclick="switchAdminTab('tab-rooms')" id="nav-tab-rooms"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 transition-all text-left">
-                        <i class="fa-solid fa-door-open"></i> Quản Lý Phòng
-                    </button>
-                    <button onclick="switchAdminTab('tab-invoices')" id="nav-tab-invoices"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 transition-all text-left">
-                        <i class="fa-solid fa-receipt"></i> Lịch Sử HĐ
-                    </button>
-                    <button onclick="switchAdminTab('tab-payment-requests')" id="nav-tab-payment-requests"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> Yêu Cầu HĐ <span id="badge-payment-requests"
-                            class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-                    </button>
-                    <button onclick="switchAdminTab('tab-issues')" id="nav-tab-issues"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
-                        <i class="fa-solid fa-screwdriver-wrench"></i> Sự Cố <span id="badge-issues"
-                            class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-                    </button>
-                    <button onclick="switchAdminTab('tab-chats')" id="nav-tab-chats"
-                        class="admin-tab-btn py-2.5 px-3 text-xs font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 relative transition-all text-left">
-                        <i class="fa-solid fa-comments"></i> Nhắn Tin <span id="badge-chats"
-                            class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-                    </button>
-                    <button onclick="logoutAdmin()"
-                        class="py-2.5 px-3 text-xs font-semibold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center gap-2 shrink-0 mt-auto transition-all text-left">
-                        <i class="fa-solid fa-lock"></i> Khóa
+                    <button type="button" class="theme-toggle mobile-logout" onclick="logoutAdmin()"
+                        aria-label="Đăng xuất" title="Đăng xuất">
+                        <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
                     </button>
                 </div>
-                <button onclick="toggleAdminNav()" id="admin-nav-toggle"
-                    class="admin-nav-toggle absolute left-0 top-4 -translate-x-1/2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center shadow-xs z-10"
-                    title="Ẩn/hiện thanh điều hướng" aria-expanded="true">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <div class="flex-1 min-w-0 space-y-5">
-                    <span class="text-xs font-semibold text-slate-500">Bảng điều khiển Chủ Trọ</span>
+            </header>
+            <main id="view-admin" class="admin-content">
+                <section class="admin-page-intro">
+                    <div>
+                        <span id="admin-page-kicker" class="page-kicker"><i class="fa-solid fa-sparkles" aria-hidden="true"></i> TỔNG QUAN VẬN HÀNH</span>
+                        <h1 id="admin-page-title">Tổng quan</h1>
+                        <p id="admin-page-description">Cập nhật tình hình phòng và doanh thu của nhà trọ.</p>
+                    </div>
+                    <button type="button" class="primary-action" onclick="openAddRoomModal()">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i> Thêm phòng mới
+                    </button>
+                </section>
+
+        <div class="admin-layout">
+            <div class="flex-1 min-w-0 space-y-5">
 
                     <!-- TAB 1: TỔNG QUAN -->
                     <div id="tab-overview" class="admin-tab-content space-y-4">
@@ -706,6 +573,35 @@
         </div>
     </main>
         </div>
+
+    <nav class="admin-mobile-nav u041 ux" role="tablist" aria-label="Điều hướng quản trị">
+        <div class="u041-shadow" aria-hidden="true"></div>
+        <div class="u041-bar" aria-hidden="true"></div>
+        <div class="u041-bub" aria-hidden="true"></div>
+        <ul class="u041-tabs">
+            <li>
+                <button type="button" class="u041-tab admin-tab-btn" role="tab" aria-selected="true"
+                    aria-controls="tab-overview" tabindex="0" onclick="switchAdminTab('tab-overview')">
+                    <span class="u041-ic" aria-hidden="true"><i class="fa-solid fa-chart-pie"></i></span>
+                    <span class="u041-lab">Tổng quan</span>
+                </button>
+            </li>
+            <li>
+                <button type="button" class="u041-tab admin-tab-btn" role="tab" aria-selected="false"
+                    aria-controls="tab-rooms" tabindex="-1" onclick="switchAdminTab('tab-rooms')">
+                    <span class="u041-ic" aria-hidden="true"><i class="fa-solid fa-door-open"></i></span>
+                    <span class="u041-lab">Phòng</span>
+                </button>
+            </li>
+            <li>
+                <button type="button" class="u041-tab admin-tab-btn" role="tab" aria-selected="false"
+                    aria-controls="tab-invoices" tabindex="-1" onclick="switchAdminTab('tab-invoices')">
+                    <span class="u041-ic" aria-hidden="true"><i class="fa-solid fa-receipt"></i></span>
+                    <span class="u041-lab">Hóa đơn</span>
+                </button>
+            </li>
+        </ul>
+    </nav>
     </div>
 
     <!-- Hidden Print Area -->
@@ -989,7 +885,9 @@
                 document.documentElement.dataset.theme = theme;
                 localStorage.setItem('appTheme', theme);
                 const isDark = theme === 'dark';
+                document.querySelector('meta[name="theme-color"]').content = isDark ? '#07080D' : '#F4F2EE';
                 toggle.setAttribute('aria-label', isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối');
+                toggle.setAttribute('aria-pressed', String(isDark));
                 toggle.title = isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối';
                 icon.className = `fa-solid ${isDark ? 'fa-sun' : 'fa-moon'}`;
             }
@@ -998,30 +896,15 @@
                 applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
             };
 
-            applyTheme(localStorage.getItem('appTheme') === 'dark' ? 'dark' : 'light');
+            applyTheme(document.documentElement.dataset.theme);
         })();
     </script>
 
     <!-- Firebase Script & Logic -->
     <script type="module">
+        import { firebaseConfig, BANK_CONFIG } from "./src/firebase/config.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, get, set, remove, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyD-_W9YnybWOgWYbP2jydZWVpW0KabE-Y8",
-            authDomain: "quanlynhatro-e35b2.firebaseapp.com",
-            databaseURL: "https://quanlynhatro-e35b2-default-rtdb.asia-southeast1.firebasedatabase.app/",
-            projectId: "quanlynhatro-e35b2",
-            storageBucket: "quanlynhatro-e35b2.firebasestorage.app",
-            messagingSenderId: "939635608313",
-            appId: "1:939635608313:web:a7047a74b3a2ec04bd7028"
-        };
-
-        const BANK_CONFIG = {
-            bankBin: "970407",
-            accountNo: "19038191013016",
-            accountName: "LA TOAN THINH"
-        };
+        import { getDatabase, ref, get, set, update, remove, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const MAX_ROOMS = 12;
 
@@ -1132,87 +1015,76 @@
             });
         };
 
-        function syncPortalTab(view) {
-            const tabs = [...document.querySelectorAll('.u039-tab')];
-            const pill = document.querySelector('.u039-pill');
-            const activeIndex = view === 'admin' ? 1 : 0;
-            tabs.forEach((tab, index) => {
-                tab.setAttribute('aria-selected', String(index === activeIndex));
-                tab.tabIndex = index === activeIndex ? 0 : -1;
-            });
-            if (pill && tabs[activeIndex]) {
-                requestAnimationFrame(() => {
-                    pill.style.setProperty('--x', `${tabs[activeIndex].offsetLeft}px`);
-                    pill.style.setProperty('--w', `${tabs[activeIndex].offsetWidth}px`);
-                });
+        const ADMIN_SECTIONS = {
+            'tab-overview': {
+                title: 'Tổng quan',
+                kicker: 'TỔNG QUAN VẬN HÀNH',
+                description: 'Cập nhật tình hình phòng và doanh thu của nhà trọ.'
+            },
+            'tab-rooms': {
+                title: 'Quản lý phòng',
+                kicker: 'KHÔNG GIAN QUẢN LÝ',
+                description: 'Theo dõi tình trạng thuê, thông tin khách và thanh toán.'
+            },
+            'tab-invoices': {
+                title: 'Lịch sử hóa đơn',
+                kicker: 'LỊCH SỬ GIAO DỊCH',
+                description: 'Tra cứu các hóa đơn đã chốt và in theo từng kỳ.'
             }
+        };
+
+        function updateMobileNavIndicator() {
+            const nav = document.querySelector('.admin-mobile-nav');
+            const activeTab = nav?.querySelector('.u041-tab[aria-selected="true"]');
+            if (!nav || !activeTab || !nav.clientWidth) return;
+
+            const navBounds = nav.getBoundingClientRect();
+            const tabBounds = activeTab.getBoundingClientRect();
+            nav.style.setProperty('--x', `${tabBounds.left - navBounds.left + tabBounds.width / 2}px`);
         }
 
-        document.querySelectorAll('.u039-tab').forEach((tab, index, tabs) => {
+        window.switchAdminTab = function (tabId) {
+            const section = ADMIN_SECTIONS[tabId];
+            const panel = document.getElementById(tabId);
+            if (!section || !panel) {
+                console.error(`Unknown admin tab: ${tabId}`);
+                return;
+            }
+
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.toggle('hidden', el !== panel));
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                const isActive = btn.getAttribute('aria-controls') === tabId;
+                btn.setAttribute('aria-selected', String(isActive));
+                btn.classList.toggle('is-active', isActive);
+                btn.tabIndex = isActive ? 0 : -1;
+            });
+
+            document.getElementById('admin-current-section').textContent = section.title;
+            document.getElementById('admin-page-title').textContent = section.title;
+            document.getElementById('admin-page-kicker').lastChild.textContent = ` ${section.kicker}`;
+            document.getElementById('admin-page-description').textContent = section.description;
+            requestAnimationFrame(updateMobileNavIndicator);
+
+            if (tabId === 'tab-overview') renderOverviewAnalytics();
+            if (tabId === 'tab-rooms') renderFilteredRooms();
+            if (tabId === 'tab-invoices') renderInvoiceHistory();
+        };
+
+        document.querySelectorAll('.admin-tab-btn').forEach(tab => {
             tab.addEventListener('keydown', event => {
                 if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-                event.preventDefault();
+                const tabList = event.currentTarget.closest('[role="tablist"]');
+                const tabs = [...tabList.querySelectorAll('[role="tab"]')];
+                const index = tabs.indexOf(event.currentTarget);
                 const direction = event.key === 'ArrowRight' ? 1 : -1;
+                event.preventDefault();
                 const nextTab = tabs[(index + direction + tabs.length) % tabs.length];
                 nextTab.focus();
                 nextTab.click();
             });
         });
 
-        syncPortalTab('tenant');
-
-        window.addEventListener('resize', () => {
-            const isAdminVisible = !document.getElementById('view-admin').classList.contains('hidden');
-            syncPortalTab(isAdminVisible ? 'admin' : 'tenant');
-        });
-
-        window.switchView = function (view) {
-            if (view === 'tenant') {
-                document.getElementById('view-tenant').classList.remove('hidden');
-                document.getElementById('view-admin').classList.add('hidden');
-            }
-        };
-
-        window.switchAdminTab = function (tabId) {
-            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-600', 'text-white');
-                btn.classList.add('bg-slate-50', 'text-slate-600');
-            });
-
-            document.getElementById(tabId).classList.remove('hidden');
-
-            const activeBtn = document.getElementById('nav-' + tabId);
-            if (activeBtn) {
-                activeBtn.classList.remove('bg-slate-50', 'text-slate-600');
-                activeBtn.classList.add('bg-indigo-600', 'text-white');
-            }
-
-            if (tabId === 'tab-overview') renderOverviewAnalytics();
-            if (tabId === 'tab-invoices') renderInvoiceHistory();
-        };
-
-        window.toggleAdminNav = function () {
-            const panel = document.getElementById('admin-nav-panel');
-            const toggle = document.getElementById('admin-nav-toggle');
-            if (!panel || !toggle) return;
-            const collapsed = panel.classList.toggle('is-collapsed');
-            toggle.classList.toggle('is-collapsed', collapsed);
-            toggle.setAttribute('aria-expanded', String(!collapsed));
-            toggle.title = collapsed ? 'Hiện thanh điều hướng' : 'Ẩn thanh điều hướng';
-            localStorage.setItem('adminNavCollapsed', String(collapsed));
-        };
-
-        function restoreAdminNavState() {
-            const collapsed = localStorage.getItem('adminNavCollapsed') === 'true';
-            const panel = document.getElementById('admin-nav-panel');
-            const toggle = document.getElementById('admin-nav-toggle');
-            if (!collapsed || !panel || !toggle) return;
-            panel.classList.add('is-collapsed');
-            toggle.classList.add('is-collapsed');
-            toggle.setAttribute('aria-expanded', 'false');
-            toggle.title = 'Hiện thanh điều hướng';
-        }
+        window.addEventListener('resize', updateMobileNavIndicator);
 
         window.toggleAdminMode = function () {
             if (sessionStorage.getItem("isAdminLoggedIn") === "true") {
@@ -1241,9 +1113,13 @@
         function showAdminView() {
             document.getElementById('admin-login').classList.add('hidden');
             document.getElementById('admin-shell').classList.remove('hidden');
-            document.getElementById('view-admin').classList.remove('hidden');
-            document.getElementById('view-tenant').classList.add('hidden');
-            restoreAdminNavState();
+            document.getElementById('admin-date').textContent = new Intl.DateTimeFormat('vi-VN', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(new Date());
+            window.switchAdminTab('tab-overview');
             loadRoomsAdmin();
         }
 
@@ -1252,6 +1128,7 @@
             document.getElementById('admin-shell').classList.add('hidden');
             document.getElementById('admin-login').classList.remove('hidden');
             document.body.classList.remove('overflow-hidden');
+            document.querySelector('.login-submit').focus();
         };
 
         function calculateWater(room) {
@@ -1326,6 +1203,10 @@
             };
         }
 
+        function isBillableRoom(room) {
+            return room?.status === 'Đang thuê';
+        }
+
         function parseMonthFromDateStr(dateStr) {
             if (!dateStr) return null;
             let parts = dateStr.split(' ');
@@ -1379,6 +1260,40 @@
             });
 
             return monthlyData;
+        }
+
+        function getCurrentBillingPeriod(date = new Date()) {
+            return `${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+        }
+
+        function getRoomCommittedDebt(room) {
+            if (!room || room.status !== 'Đang thuê') return 0;
+
+            const explicitDebt = Math.max(0, parseNum(room.previousMonthDebt ?? room.debt));
+            if (explicitDebt > 0) return explicitDebt;
+
+            const history = Array.isArray(room.debtHistory) ? room.debtHistory : [];
+            return history.length ? Math.max(0, parseNum(history[history.length - 1]?.amount)) : 0;
+        }
+
+        function getCurrentRevenueSummary() {
+            return roomsData.reduce((summary, room) => {
+                if (room.status !== 'Đang thuê') return summary;
+                const total = getRoomTotalDetails(room).total;
+                summary.expected += total;
+                if (room.paymentStatus === 'Đã thanh toán') summary.paid += total;
+                return summary;
+            }, { expected: 0, paid: 0 });
+        }
+
+        function getOutstandingDebt() {
+            return roomsData.reduce((total, room) => total + getRoomCommittedDebt(room), 0);
+        }
+
+        function getRecordedRevenue() {
+            return invoicesData
+                .filter(invoice => invoice.status === 'Đã thanh toán')
+                .reduce((total, invoice) => total + Math.max(0, parseNum(invoice.total)), 0);
         }
 
         function renderOverviewAnalytics() {
@@ -1469,7 +1384,6 @@
             }
 
             renderRevenueComparison();
-            renderDebtHistory();
             const debtEl = document.getElementById('stat-debt');
             if (debtEl) debtEl.innerText = getOutstandingDebt().toLocaleString('vi-VN') + ' đ';
             const revenueEl = document.getElementById('stat-total-revenue');
@@ -1570,7 +1484,17 @@
                 }
 
                 renderOverviewAnalytics();
-            } catch (err) { console.error(err); }
+                return true;
+            } catch (err) {
+                console.error('Không thể tải dữ liệu từ Firebase.', err);
+                await Swal.fire({
+                    title: 'Không thể tải dữ liệu Firebase',
+                    text: err?.message || 'Kiểm tra kết nối mạng và quyền truy cập Realtime Database.',
+                    icon: 'error',
+                    customClass: { popup: 'rounded-xl text-xs' }
+                });
+                return false;
+            }
         }
 
         function listenToRoomChat(roomDocId, callback) {
@@ -2286,8 +2210,8 @@
         };
 
         function loadRoomsAdmin() {
-            loadAllData().then(() => {
-                renderFilteredRooms();
+            loadAllData().then(loaded => {
+                if (loaded) renderFilteredRooms();
             });
         }
 

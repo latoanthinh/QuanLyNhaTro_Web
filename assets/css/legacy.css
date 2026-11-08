@@ -1,4 +1,5 @@
 
+        /* Retained for the previous layout; the current dashboard uses dashboard.css. */
         html {
             font-size: clamp(14px, calc(0.25vw + 13px), 16px);
         }

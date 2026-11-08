@@ -2649,5 +2649,5 @@
             });
         };
 
-        loadAllData();
+        if (adminUser) loadAllData();
     
